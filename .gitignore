@@ -1,0 +1,4 @@
+# ignore the binaries that are compiled
+*.elf
+*.bin
+*.hex
