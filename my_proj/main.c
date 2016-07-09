@@ -7,12 +7,14 @@
 /* REMEMBER THE RCC FOR INTERRUPTS/GPIOS/ANYTHING!! */
 
 /* TO DO: */
-// streamline the display section
+// get a heartbeat going for the LED
+  // setting up PWM for LED pin
 
 /******************************** Definitions ********************************/
 #define HSE_VALUE ((uint32_t)8000000)
 #define APB1_CLK ((uint32_t)42000000)
 #define APB1_CLK_TIM3 ((uint32_t)84000000)
+#define APB1_CLK_TIM4 ((uint32_t)84000000)
 #define BUF_SIZE ((uint32_t)255)
 #define NUM_BUF_SIZE ((uint8_t)11)     /* max 32-bit number is 10 digits */
 
@@ -25,6 +27,8 @@ NVIC_InitTypeDef NVIC_InitStruct;
 
 /******************************** Global Flags *******************************/
 int backFlag = 0;
+volatile int ledFlag = 0;
+volatile int counter = 0;
 
 
 /******************************** IRQ Handlers *******************************/
@@ -43,8 +47,7 @@ void USART2_IRQHandler()            /* function name defined in startup file */
 
     head = (head + 1) % BUF_SIZE;
 
-    /*
-     * This doesn't work with how my loop is structured but there needs
+    /* This doesn't work with how my loop is structured but there needs
      * to be some kind of handling in case the buffer gets full before it
      * can be read. I'll worry about it later.
      */
@@ -56,7 +59,29 @@ void USART2_IRQHandler()            /* function name defined in startup file */
 void TIM3_IRQHandler()
 {
   if (TIM3->SR & TIM_SR_UIF)
-    GPIOD->ODR ^= (1 << 15);                /* toggle LED */
+  {
+    if (ledFlag)
+    {
+      if (TIM4->CCR1 == 0)
+        ledFlag = 0;
+      else
+        TIM4->CCR1 -= 50;
+    }
+    else
+    {
+      if (TIM4->CCR1 == 1000)
+      {
+        counter++;
+        if (counter == 4)
+        {
+          ledFlag = 1;
+          counter = 0;
+        }
+      }
+      else
+        TIM4->CCR1 += 50;
+    }
+  }
 
   TIM3->SR &= ~(TIM_SR_UIF);
 }
@@ -65,7 +90,8 @@ void TIM3_IRQHandler()
 /*************************** Function Prototypes *****************************/
 void USART2_init(uint32_t baud);
 void led_init();
-void delay_ms_init(uint16_t delay);
+void TIM3_delay_ms_init(uint16_t delay);
+void TIM4_init();
 void number_to_ascii(uint32_t value, char *numArray);
 void reverse_array(char *str);
 void print_string(char *data);
@@ -102,7 +128,8 @@ int main(void)
   GPIOA->MODER &= ~(3 << 0);            /* set the push button to an input */
 
   led_init();
-  delay_ms_init(1000);
+  TIM3_delay_ms_init(45);
+  TIM4_init();
   USART2_init(115200);
 
   while (1)
@@ -147,9 +174,8 @@ void display_cmd_string(char *cmdStringPtr, uint8_t *cmdStringPos,
   uint8_t i;
 
   if (!backFlag)
-  {
-    /* 
-     *  the key was not backspace while the cursor was in the middle of
+  { 
+    /*  the key was not backspace while the cursor was in the middle of
      *  the string
      */
     if (*cmdStringPos < *cmdStringEndPos)
@@ -188,8 +214,7 @@ void display_cmd_string(char *cmdStringPtr, uint8_t *cmdStringPos,
     i++;
   }
 
-  /*
-   *  if there's a backspace in the middle of the string, the string isn't
+  /*  if there's a backspace in the middle of the string, the string isn't
    *  adding a character and therefore doesn't need to be incremented
    */
   if (!backFlag)
@@ -234,9 +259,8 @@ int process_input(char *cmdStringPtr, uint8_t *cmdStringPos,
 
     case 0x1B:                                    /* escape seq */
       tail = (tail + 2) % BUF_SIZE;
-
-     /*
-      *  This line was necessary because the USART interrupt wasn't able
+   
+     /*  This line was necessary because the USART interrupt wasn't able
       *  to receive all of the characters in an escape sequence quick
       *  enough to have the correct character for the switch below. Also,
       *  the tail would be greater than the head and this loop's criteria
@@ -282,8 +306,7 @@ int process_input(char *cmdStringPtr, uint8_t *cmdStringPos,
       if (*cmdStringPos != *cmdStringEndPos)      
       {
 
-       /*
-        *  backspace is entered but the cursor is something in the middle
+       /*  backspace is entered but the cursor is something in the middle
         *  of the string
         */
 
@@ -357,8 +380,7 @@ void clear_string(char *cmdStringPtr, uint8_t *cmdStringEndPos)
 }
 
 
-/*
- *  USART2_init()
+/*  USART2_init()
  *
  *  Holy mother of fuck was this frustrating.
  *
@@ -394,8 +416,7 @@ void USART2_init(uint32_t baud)
   RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
   RCC->APB1ENR |= RCC_APB1ENR_USART2EN; 
 
-  /*
-   *  PA2 = USART2 TX
+  /*  PA2 = USART2 TX
    *  PA3 = USART2 RX
    */
   GPIOA->MODER |= (1 << 5);               /* PA2 used as alt func */
@@ -405,9 +426,8 @@ void USART2_init(uint32_t baud)
 
   USART2->CR1 &= ~(USART_CR1_M);          /* Word length = 8 bits */
   USART2->CR2 &= ~(USART_CR2_STOP);       /* 1 stop bit */
-
-  /* 
-   *  Same as eq at 30.3.4 of ref manual but modified to prevent div_value
+ 
+  /*  Same as eq at 30.3.4 of ref manual but modified to prevent div_value
    *  from getting too large before dividing
    */
   div_value = ((APB1_CLK*25)/(4*baud));
@@ -446,11 +466,15 @@ void USART2_init(uint32_t baud)
 void led_init()
 {
   RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;  
-  GPIOD->MODER |= (1 << 30);            /* PD15 for the LED as an output */
+  //GPIOD->MODER |= (1 << 30);            /* PD15 for the LED as an output */
+
+  // for PD12
+  GPIOD->MODER |= (1 << 25);
+  GPIOD->AFR[1] |= (1 << 17);
 }
 
 
-/*  delay_ms_init()
+/*  TIM3_delay_ms_init()
  *
  *  Takes the desired delay value in milliseconds as input. Based on the
  *  current prescale value (8400), the delay will only work up to about
@@ -461,7 +485,7 @@ void led_init()
  *  Returns: Nothing  
  */
 
-void delay_ms_init(uint16_t delay)
+void TIM3_delay_ms_init(uint16_t delay)
 {
   uint16_t prescale_value =  8400;   /* for even division of 84MHz clock */
   uint16_t auto_reload_value = 0;
@@ -487,6 +511,38 @@ void delay_ms_init(uint16_t delay)
   NVIC_Init(&NVIC_InitStruct);
 
   TIM3->CR1 |= TIM_CR1_CEN;                 /* counter enable */
+}
+
+
+/*  TIM4init()
+ *
+ *  Currently configured to output a PWM signal on Channel 1 of TIM4. This is
+ *  connected to PD12 on the board (Green LED) and used concurrently with TIM3
+ *  to create a "heartbeat" for the LED.
+ *
+ *  Returns: Nothing  
+ */
+
+void TIM4_init()
+{
+  uint16_t prescale_value = 840;
+  uint16_t auto_reload_value = 1000;
+
+  RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;       
+  
+  TIM4->CR1 &= ~(TIM_CR1_DIR);              /* upcounter */
+
+  /* setting PWM1 output mode and enabling preloading */
+  TIM4->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1PE);
+  TIM4->CCER |= TIM_CCER_CC1E;              /* enabling compare ch 1 */
+  TIM4->CCR1 = 0;                           /* starting duty cycle at 0 */
+
+  TIM4->PSC = (prescale_value - 1);
+  TIM4->ARR = (auto_reload_value - 1);
+
+  TIM4->CNT = 0;                            /* initial counter value */
+
+  TIM4->CR1 |= TIM_CR1_CEN;                 /* counter enable */
 }
 
 
