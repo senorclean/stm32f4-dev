@@ -3,7 +3,8 @@
 STLINK=/home/andrew/stlink
 
 # Put your source files here (or *.c, etc)
-SRCS=main.c system_stm32f4xx.c misc.c
+SRCS  = main.c system_stm32f4xx.c misc.c my_usart.c cmdline.c util.c timer.c
+SRCS += heartbeat.c my_gpio.c sched.c
 
 # Binaries will be generated with this name (.elf, .bin, .hex, etc)
 PROJ_NAME=main
