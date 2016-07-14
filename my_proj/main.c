@@ -11,16 +11,11 @@
 /* REMEMBER THE RCC FOR INTERRUPTS/GPIOS/ANYTHING!! */
 
 /* TO DO: */
-// use series of flags instead of the "while waiting" for escape keys
 // get I2C working with audio chip on sch
 // get EEPROM/SPI-RJ45 for SPI functionality
 
 /******************************** Definitions ********************************/
 #define HSE_VALUE ((uint32_t)8000000)
-#define BUF_SIZE ((uint8_t)255)
-
-
-/*************************** Function Prototypes *****************************/
 
 /* Ghetto delay */
 /*void ms_delay(int ms)

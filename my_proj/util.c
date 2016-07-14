@@ -9,12 +9,12 @@
  *  Returns: Nothing  
  */
 
-void clear_string(char *cmdStringPtr)
+void clear_string(char *cmdStringPtr, int startPoint)
 {
   int i = 0;
-  while (cmdStringPtr[i] != '\0')
+  while (cmdStringPtr[i + startPoint] != '\0')
   {
-    cmdStringPtr[i] = '\0';
+    cmdStringPtr[i + startPoint] = '\0';
     i++;
   }
 

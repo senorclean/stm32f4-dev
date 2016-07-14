@@ -10,13 +10,9 @@ uint16_t counter = 0;
 void TIM3_IRQHandler()
 {
   if (TIM3->SR & TIM_SR_UIF)
-  {
-    if (counter == 65535)
-      counter = 0;
-    else
-      counter++;
-  }
+    counter++;
 
+  TIM3->CNT = 0;
   TIM3->SR &= ~(TIM_SR_UIF);
 }
 
