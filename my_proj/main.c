@@ -12,6 +12,11 @@
 
 /* TO DO: */
 // get I2C working with audio chip on sch
+  // setup read, write and ISR
+// enable DMA for DAC for audio chip
+// get some error checking going on
+// figure out how to enable interrupts without NVIC
+// put chip into low power modes and take it out
 // get EEPROM/SPI-RJ45 for SPI functionality
 
 /******************************** Definitions ********************************/
