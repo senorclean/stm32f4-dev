@@ -7,16 +7,24 @@
 #include "timer.h"
 #include "my_gpio.h"
 #include "sched.h"
+#include "util.h"
+#include "i2c.h"
 
 /* REMEMBER THE RCC FOR INTERRUPTS/GPIOS/ANYTHING!! */
 
 /* TO DO: */
+// Optimize cmdline.c
+// make minimalistic printf function
+  // allowed negative integers for numbers_to_ascii
+  // decimal, string, and hex functionality
 // get I2C working with audio chip on sch
-  // setup read, write and ISR
-// enable DMA for DAC for audio chip
+  // setup read, write
+// setup board.h file with a board_init() for disc board specific stuff
+// enable DMA for USART for cmd line
 // get some error checking going on
 // figure out how to enable interrupts without NVIC
 // put chip into low power modes and take it out
+// configure USB1 for ACM capability (it can talk USART as well)
 // get EEPROM/SPI-RJ45 for SPI functionality
 
 /******************************** Definitions ********************************/
@@ -41,10 +49,17 @@ int main(void)
   TIM3_delay_ms_init();
   TIM4_init();
   USART2_init();
+  I2C1_init();
 
   while (1)
   {
     scheduler();
+
+    if (i2c_data_flag)
+    {
+
+      i2c_data_flag = 0;
+    }
   }
 }
 

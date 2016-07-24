@@ -1,25 +1,75 @@
 #include "stm32f4xx.h"
 #include "misc.h"
+#include "util.h"
+
+static int i2c_addr = 0x94;
+volatile int i2c_data = 0;
+volatile int i2c_data_flag = 0;
 
 void I2C1_IRQHandler()
 {
-	
+	//print_string("here\n\r");
+	if (I2C1->SR1 & I2C_SR1_SB)
+	{
+		I2C1->DR = i2c_addr;
+	}
+	else
+	{
+		// potentially separate this into two actions
+		if ((I2C1->SR1 & I2C_SR1_ADDR) && !(I2C1->SR2 & I2C_SR2_TRA))
+		{
+			I2C1->CR1 &= ~(I2C_CR1_ACK);
+		}
+		else
+		{
+			if (I2C1->SR1 & I2C_SR1_RXNE)
+			{
+				i2c_data = I2C1->DR;
+				i2c_data_flag = 1;
+			}
+		}
+	}
+
 }
 
 
-void i2c_init()
+void I2C1_init()
 {
-	/* APB1 clock already enabled from USART2 init*/
-
 	NVIC_InitTypeDef NVIC_InitStruct;
 
-	I2C1->CR2 |= I2C_CR2_FREQ = 42;  				/* (for 42MHz APB1 clock freq) */
-	I2C1->CCR = 210;												/* 100KHz clock speed */
+
+
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+	RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
+
+
+	GPIOB->MODER |= (1 << 13);               /* PB6 used as alt func */
+	GPIOB->MODER |= (1 << 19);               /* PB9 used as alt func */
+
+	GPIOB->OTYPER |= (1 << 6);
+	GPIOB->OTYPER |= (1 << 9);
+
+	/*GPIOB->PUPDR |= (1 << 12);
+	GPIOB->PUPDR |= (1 << 18);*/
+
+	/*GPIOB->OSPEEDR |= (3 << 12);
+	GPIOB->OSPEEDR |= (3 << 18);*/
+
+	GPIOB->AFR[0] |= (4 << 24);              /* PB6 as AF4 (I2C) function */
+	GPIOB->AFR[1] |= (4 << 4);               /* PB9 as AF4 (I2C) function */
+
+	// addr: 0x94
+
+	RCC->APB1RSTR |= RCC_APB1RSTR_I2C1RST;
+	RCC->APB1RSTR &= ~(RCC_APB1RSTR_I2C1RST);
+
+	I2C1->CR2 = 42;  												/* (for 42MHz APB1 clock freq) */
+	I2C1->CCR |= 210;												/* 100KHz clock speed */
 	I2C1->TRISE = 43; 											/* Max Trise time = APB1 freq + 1 */
 
 
 
-	NVIC_InitStruct.NVIC_IRQChannel = I2C1_IRQn;
+	NVIC_InitStruct.NVIC_IRQChannel = I2C1_EV_IRQn;
 	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -27,7 +77,15 @@ void i2c_init()
 	NVIC_Init(&NVIC_InitStruct);
 
 	I2C1->CR2 |= I2C_CR2_ITEVTEN;						/* Interrupt enable */
+
 	I2C1->CR1 |= I2C_CR1_PE; 								/* I2C enable */
+
+	I2C1->CR1 |= I2C_CR1_ACK;
+
+	GPIOD->MODER |= (1 << 8);
+
+	GPIOD->ODR |= (1 << 4);
+
 }
 
 
@@ -41,13 +99,61 @@ void i2c_read()
 	 * 5. INT: same as four, when done, set ACK=0 and stop
 	 */
 
+
+
+	/*I2C1->CR1 |= I2C_CR1_START;
+
+	while(!(I2C1->SR1 & I2C_SR1_SB));
+
+	I2C1->DR = 0x94;
+
+	while(!(I2C1->SR1 & I2C_SR1_ADDR));
+
+	if(I2C1->SR2 & I2C_SR2_TRA)
+	{
+		I2C1->DR = 0x01;
+	}
+
+
+	while(!(I2C1->SR1 & I2C_SR1_BTF));
+
+	I2C1->CR1 |= I2C_CR1_STOP;
+
+	while(I2C1->SR2 & I2C_SR2_BUSY);
+
+
+	I2C1->CR1 |= I2C_CR1_START;
+
+	while(!(I2C1->SR1 & I2C_SR1_SB));
+
+	I2C1->DR = 0x95;
+
+	while(!(I2C1->SR1 & I2C_SR1_ADDR));
+
+	// FOR ONLY READING ONE BYTE
+
+	I2C1->CR1 &= ~(I2C_CR1_ACK);
+	if(!(I2C1->SR2 & I2C_SR2_TRA))
+	{
+		I2C1->CR1 |= I2C_CR1_STOP;
+		while(!(I2C1->SR1 & I2C_SR1_RXNE));
+		i2c_data = I2C1->DR;
+
+		while(I2C1->SR2 & I2C_SR2_BUSY);
+
+		I2C1->CR1 |= I2C_CR1_ACK;
+
+		i2c_data_flag = 1;
+	}
+*/
+
 	// I2C_CR1_ACK
 	// I2C_DR, (RXNE), not empty
 	// I2C_SR1_SMBALERT need to write 0
 	// I2C_SR1_BTF (1 transfer is finished)
 	// I2C_SR1_SB (start bit)
 
-	I2C1->CR1 |= 
+	 
 }
 
 void i2c_write()

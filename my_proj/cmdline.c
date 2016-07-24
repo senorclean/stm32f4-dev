@@ -1,17 +1,18 @@
 #include "my_usart.h"
 #include "util.h"
 
+
 #define BUF_SIZE ((uint8_t)255)
 #define MAX_HISTORY ((uint8_t)21)
 
-static int displayFlag = 0;
-static int backFlag = 0;
+static int incrementFlag = 0;
 static int escapeFlag = 0;
 static char cmdString[MAX_HISTORY][BUF_SIZE] = {""};
 static uint8_t cmdStringPos = 0;
 static uint8_t cmdStringEndPos = 0;
 static uint8_t cmdHistPos = 0;
 static uint8_t cmdHistEndPos = 0;
+
 
 
 /*  display_cmd_string()
@@ -28,64 +29,42 @@ static uint8_t cmdHistEndPos = 0;
  *  Returns: Nothing  
  */
 
-void display_cmd_string()
-{
-  uint8_t i;
+void display_cmd_string() {
+  int i;
+  // clear cmd line
+  for(i = 0; i < 60; i++)
+    print_string("\e[D");
 
-  if (!backFlag)
-  { 
-    /*  the key was not backspace while the cursor was in the middle of
-     *  the string
-     */
-    if (cmdStringPos < cmdStringEndPos)
-    {
-      /* the cursor is not at the end of the string */
+  for(i = 0; i < 60; i++)
+    print_char(' ');
 
-      /* shift every element forward one to accommodate new entry */
-      i = cmdStringEndPos;
-      while (i >= cmdStringPos)
-      {
-        cmdString[0][i + 1] = cmdString[0][i];
-        i--;
-      }
-
-      /* load the latest element into the cmd string to be displayed */
-      cmdString[0][cmdStringPos] = inputData[tail];
-    }
-
-    else
-    {
-      /* the cursor is at the end of the string so new value is loaded */
-      cmdString[0][cmdStringPos] = inputData[tail];
-    }
-  }
+  // print cmd string
+  print_string("\r%s", cmdString[0]);  
 
 
-  tail = (tail + 1) % BUF_SIZE;
-  print_string("\r");
-  print_string(cmdString[0]);
-
-  /* move cursor backwards to reflect where the string's current position is */
+  // move cursor to current position
   i = cmdStringPos;
-  while (cmdStringEndPos > i)
-  {
-    print_string("\e[1D");
+  while (cmdStringEndPos > i) {
+    print_char('\b');
     i++;
   }
 
   /*  if there's a backspace in the middle of the string, the string isn't
    *  adding a character and therefore doesn't need to be incremented
    */
-  if (!backFlag)
-  {
+  if (incrementFlag) {
     cmdStringPos++;
     cmdStringEndPos++;
   }
 
+  incrementFlag = 0;
+  tail = (tail + 1) % BUF_SIZE;
 
-  backFlag = 0;
+  print_string("\r\nDec: %d\r\nStr: %s\r\nHex: %x\r\n", 0, "hello", 0);
+  //print_string("\r\nDec: %d\r\n", 45);
+  //print_string("Str: %s\r\n", "hello");
+  //print_string("\r\nStr: %s\r\nHex: %x\r\nDec: %d\r\n", "hello", 45, 45);
 }
-
 
 /*  process_input()
  *
@@ -100,31 +79,24 @@ void display_cmd_string()
  *  needs to be called or whether the displaying is handled here.  
  */
 
-void process_input()
-{
-  char numArray[10] = "";
+void process_input() {
   if (tail < head)
   {
     int i;
     int j;
 
-    if (!escapeFlag)
-    {
-      switch(inputData[tail])
-      {
+    if (!escapeFlag) {
+      switch(inputData[tail]) {
         case 0x0D:                                    /* enter key */
-          j = 0;
 
           if (cmdHistEndPos < MAX_HISTORY)
             cmdHistEndPos++;
 
           j = cmdHistEndPos;
-          while (j > 0)
-          {
+          while (j > 0) {
             i = 0;
-            clear_string(cmdString[j], 0);
-            while (cmdString[j - 1][i] != '\0')
-            {
+            clear_string(cmdString[j], 60);
+            while (cmdString[j - 1][i] != '\0') {
               cmdString[j][i] = cmdString[j - 1][i];
               i++;
             }
@@ -134,15 +106,14 @@ void process_input()
 
 
           print_string("\r\n");
-          clear_string(cmdString[0], 0);
+          clear_string(cmdString[0], 60);
           cmdStringPos = 0;
           cmdStringEndPos = 0;
           cmdHistPos = 0;
 
 
           tail = (tail + 1) % BUF_SIZE;
-          displayFlag = 0;
-          break;
+          return;
 
         case 0x1B:                                    /* escape seq */
           escapeFlag++;
@@ -151,215 +122,139 @@ void process_input()
 
         case 0x7F:                                    /* backspace */
 
-          i = cmdStringPos;
+          if (cmdStringPos > 0) {
 
-          if (cmdStringPos != cmdStringEndPos)      
-          {
+            i = cmdStringPos;
+            if (cmdStringPos != cmdStringEndPos) {
 
-           /*  backspace is entered but the cursor is somewhere in the middle
-            *  of the string
-            */
+             /*  backspace is entered but the cursor is somewhere in the middle
+              *  of the string
+              */
 
-            /* shifting everything in front of the cursor back one */
-            while (cmdString[0][i] != '\0')
-            {
-              cmdString[0][i - 1] = cmdString[0][i];
-              i++;
-            }
+              /* shifting everything in front of the cursor back one */
+              while (cmdString[0][i] != '\0') {
+                cmdString[0][i - 1] = cmdString[0][i];
+                i++;
+              }
 
-            cmdString[0][i - 1] = '\0';
+              cmdString[0][i - 1] = '\0';
 
-            /* making sure deletion stops at origin of string */
-            if ((cmdStringPos != 0) && (cmdStringEndPos != 0))
-            {
               cmdStringPos--;
               cmdStringEndPos--;
+
+              break; 
             }
 
-            /* clearing the stale characters to the right of the cursor */
-            for (i = cmdStringPos; i < cmdStringEndPos; i++)
-              print_char(' ');
+            else {
+              /*  backspace is entered and cursor is at end of string */
 
-            backFlag = 1;
-            displayFlag = 1;
-            break; 
-          }
-
-          else
-          {
-            /*  backspace is entered and cursor is at end of string */
-
-            /* making sure deletion stops at origin of string */
-            cmdString[0][i - 1] = '\0';
-            if (cmdStringPos != 0)
-            {
+              /* delete last character in string */
+              cmdString[0][i - 1] = '\0';
               cmdStringPos--;
-              cmdStringEndPos--;
+              cmdStringEndPos--;          
+
+              break;
             }
-
-            /* clearing stale character in console line */
-            print_string("\e[1D \e[1D");          
-
-            tail = (tail + 1) % BUF_SIZE;
-            displayFlag = 0;
-            break;
           }
-
 
         default:
-          displayFlag = 1;
+          if (cmdStringPos < cmdStringEndPos) {
+            /* the cursor is not at the end of the string */
+
+            /* shift every element forward one to accommodate new entry */
+            i = cmdStringEndPos;
+            while (i >= cmdStringPos) {
+              cmdString[0][i + 1] = cmdString[0][i];
+              i--;
+            }
+
+            /* load the latest element into the cmd string to be displayed */
+            cmdString[0][cmdStringPos] = inputData[tail];
+          }
+
+          else {
+            /* the cursor is at the end of the string so new value is loaded */
+            cmdString[0][cmdStringPos] = inputData[tail];
+          }
+          
+          incrementFlag = 1;
           break;
       }
     }
 
-    else
-    {
-      if (escapeFlag == 2)
-      {
-        switch(inputData[tail])
-        {
+    else {
+      if (escapeFlag == 2) {
+        switch(inputData[tail]) {
           case 'A':                                 /* up arrow */
-            if (cmdHistPos < cmdHistEndPos)
-            {
+            if (cmdHistPos < cmdHistEndPos) {
               cmdHistPos++;
 
-              i = cmdStringPos;
-              while(i > 0)
-              {
-                print_char('\b');
-                i--;
-              }
-
               i = 0;
-              while(cmdString[cmdHistPos][i] != '\0')
-                i++;
-
-              cmdStringPos = i;
-              cmdStringEndPos = i;
-
-              i = 0;
-              while (cmdString[cmdHistPos][i] != '\0')
-              {
+              while (cmdString[cmdHistPos][i] != '\0') {
                 cmdString[0][i] = cmdString[cmdHistPos][i];
                 i++;
               }
 
+              cmdStringPos = i;
+              cmdStringEndPos = i;
+
               cmdString[0][i] = '\0';
-              clear_string(cmdString[0], (i + 1));
 
-              /*number_to_ascii(cmdStringPos, &numArray[0]);
-              print_string("\r\n");
-              print_string(numArray);
-              print_string("\r\n");*/
-
-
-              for(i = 0; i < 60; i++)
-                print_char(' ');
-
-              print_string("\r");
-              print_string(cmdString[0]);
-              
-              displayFlag = 0;
             }
             break;
 
           case 'B':                                 /* down arrow */
-            if (cmdHistPos > 0)
-            {
-              i = 0;
+            if (cmdHistPos > 0) {
               cmdHistPos--;
 
-              if ((cmdHistPos == 0) && (cmdHistEndPos != 0))
-              {
-                clear_string(cmdString[0], 0);
+              if ((cmdHistPos == 0) && (cmdHistEndPos != 0)) {
+                clear_string(cmdString[0], 60);
 
-                i = cmdStringPos;
-                while(i > 0)
-                {
-                  print_char('\b');
-                  i--;
-                }
-
-                for(i = 0; i < 60; i++)
-                  print_char(' ');
-
-                print_string("\r");
                 cmdStringPos = 0;
                 cmdStringEndPos = 0;
 
-
-                displayFlag = 0;
                 break;
               }
 
-              i = cmdStringPos;
-              while(i > 0)
-              {
-                print_char('\b');
-                i--;
-              }
-
               i = 0;
-              while(cmdString[cmdHistPos][i] != '\0')
-                i++;
-
-              cmdStringPos = i;
-              cmdStringEndPos = i;
-
-              i = 0;
-              while (cmdString[cmdHistPos][i] != '\0')
-              {
+              while (cmdString[cmdHistPos][i] != '\0') {
                 cmdString[0][i] = cmdString[cmdHistPos][i];
                 i++;
               }
 
+              cmdStringPos = i;
+              cmdStringEndPos = i;
 
               cmdString[0][i] = '\0';
 
-              for(i = 0; i < 60; i++)
-                print_char(' ');
-
-              print_string("\r");
-              print_string(cmdString[0]);
-              
-              displayFlag = 0;
             }
             break;
 
           case 'C':                                 /* right arrow */
-            if (cmdStringPos < cmdStringEndPos)
-            {
-              print_string("\e[1C");
+            if (cmdStringPos < cmdStringEndPos) {
               cmdStringPos++;
-              displayFlag = 0;
+
             }
             break;
 
           case 'D':                                 /* left arrow */
-            if (cmdStringPos != 0)
-            {
-              print_string("\e[1D");
+            if (cmdStringPos > 0)
               cmdStringPos--;
-              displayFlag = 0;
-            }
             break;
         }
 
-
-        tail = (tail + 1) % BUF_SIZE;
         escapeFlag = 0;
       }
 
-      else
-      {
+      else {
         tail = (tail + 1) % BUF_SIZE;
         escapeFlag++;
         return;
       }
     }
 
-    if (displayFlag)
-      display_cmd_string();
+
+    display_cmd_string();
 
   }
 }

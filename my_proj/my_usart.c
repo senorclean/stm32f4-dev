@@ -77,8 +77,8 @@ void USART2_init()
    */
   GPIOA->MODER |= (1 << 5);               /* PA2 used as alt func */
   GPIOA->MODER |= (1 << 7);               /* PA3 used as alt func */
-  GPIOA->AFR[0] |= (7 << 8);              /* PA2 as USART function */
-  GPIOA->AFR[0] |= (7 << 12);             /* PA3 as USART function */
+  GPIOA->AFR[0] |= (7 << 8);              /* PA2 as AF7 (USART) function */
+  GPIOA->AFR[0] |= (7 << 12);             /* PA3 as AF7 (USART) function */
 
   USART2->CR1 &= ~(USART_CR1_M);          /* Word length = 8 bits */
   USART2->CR2 &= ~(USART_CR2_STOP);       /* 1 stop bit */
