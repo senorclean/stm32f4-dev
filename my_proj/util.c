@@ -39,15 +39,6 @@ void reverse_array(char *str) {
     stopPoint = 1;
   }
 
-  // if it's a hex number
-  if (str[1] == 'x') {
-    tempStr[0] = '0';
-    tempStr[1] = 'x';
-    j = 2;
-    i = 2;
-    stopPoint = 2;
-  }
-
   while (str[i] != '\0')
     i++;
 
@@ -116,13 +107,9 @@ void hex_to_ascii(int value, char *tempArray) {
   int i;
   char x;
 
-  tempArray[0] = '0';
-  tempArray[1] = 'x';
-
-
   /* seems arbitrary but a 32-bit value can't be longer than 10 digits */
-  for (i = 2; i < 10; i++) {
-    if ((value == 0) && (i == 2)) {
+  for (i = 0; i < 10; i++) {
+    if ((value == 0) && (i == 0)) {
       tempArray[i] = '0';
       i++;
       break;
@@ -164,12 +151,42 @@ void hex_to_ascii(int value, char *tempArray) {
       tempArray[i] = '0' + x;
   }
 
-  if (i > 3)
+  if (i > 1)
     reverse_array(tempArray);
 
   if (tempArray[i] != '\0')
     tempArray[i] = '\0';
 }
+
+
+int exponent(int number, int exp) {
+  int newNumber = 1;
+  int i;
+
+  for (i = 0; i < exp; i++) {
+    newNumber *= number;
+  }
+
+  return newNumber; 
+}
+
+
+int string_to_number(char *str, int base) {
+  int tempInt = 0;
+  int i = 0;
+  int j = 0;
+
+  while (str[i] != '\0') {
+    for (j = i; j > 0; j--)
+      tempInt *= exponent(base, j);
+
+    tempInt += str[i] - 48;
+    i++;
+  }
+
+  return tempInt;
+}
+
 
 
 /*  print_string()

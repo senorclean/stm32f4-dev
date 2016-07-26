@@ -13,10 +13,9 @@ typedef struct {
   uint16_t  period;
 } func_t;
 
-static func_t funcArray[3] = 	{
+static func_t funcArray[2] = 	{
                     						{heartbeat, 0, 10},
                     						{process_input, 0, 1},
-                    						{i2c_read, 0, 2000}
                   						};
 
 

@@ -13,15 +13,15 @@
 /* REMEMBER THE RCC FOR INTERRUPTS/GPIOS/ANYTHING!! */
 
 /* TO DO: */
-// Optimize cmdline.c
-// make minimalistic printf function
-  // allowed negative integers for numbers_to_ascii
-  // decimal, string, and hex functionality
+// removed extern from timer.h (if something broke)
+// check that hex_to_ascii still works
 // get I2C working with audio chip on sch
-  // setup read, write
+  // figure out how to change I2Cx based on bus number
+  // setup write
 // setup board.h file with a board_init() for disc board specific stuff
 // enable DMA for USART for cmd line
 // get some error checking going on
+// recomment my code
 // figure out how to enable interrupts without NVIC
 // put chip into low power modes and take it out
 // configure USB1 for ACM capability (it can talk USART as well)
@@ -54,12 +54,6 @@ int main(void)
   while (1)
   {
     scheduler();
-
-    if (i2c_data_flag)
-    {
-
-      i2c_data_flag = 0;
-    }
   }
 }
 

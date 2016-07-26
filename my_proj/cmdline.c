@@ -1,13 +1,17 @@
 #include "my_usart.h"
 #include "util.h"
-
+#include "i2c.h"
+#include <string.h>
+#include <math.h>
 
 #define BUF_SIZE ((uint8_t)255)
 #define MAX_HISTORY ((uint8_t)21)
+#define DEC ((uint8_t)10)
+#define HEX ((uint8_t)16)
 
 static int incrementFlag = 0;
 static int escapeFlag = 0;
-static char cmdString[MAX_HISTORY][BUF_SIZE] = {""};
+static char cmdString[MAX_HISTORY][BUF_SIZE] = {{'\0'}};
 static uint8_t cmdStringPos = 0;
 static uint8_t cmdStringEndPos = 0;
 static uint8_t cmdHistPos = 0;
@@ -39,13 +43,13 @@ void display_cmd_string() {
     print_char(' ');
 
   // print cmd string
-  print_string("\r%s", cmdString[0]);  
+  print_string("\r> %s", cmdString[0]);  
 
 
   // move cursor to current position
   i = cmdStringPos;
   while (cmdStringEndPos > i) {
-    print_char('\b');
+    print_string("\e[D");
     i++;
   }
 
@@ -59,12 +63,107 @@ void display_cmd_string() {
 
   incrementFlag = 0;
   tail = (tail + 1) % BUF_SIZE;
-
-  print_string("\r\nDec: %d\r\nStr: %s\r\nHex: %x\r\n", 0, "hello", 0);
-  //print_string("\r\nDec: %d\r\n", 45);
-  //print_string("Str: %s\r\n", "hello");
-  //print_string("\r\nStr: %s\r\nHex: %x\r\nDec: %d\r\n", "hello", 45, 45);
 }
+
+
+void process_command() {
+
+  int i;
+  int i2cAddr = 0;
+  int i2cReg = 0;
+  int numOfBytes = 0;
+  char tokenCmd[11][21] = {""};
+  char i2cTokenCmd[5][4] = {""};
+  char *tokPtr;
+
+  i = 0;
+  tokPtr = strtok(cmdString[0], " ");
+  memcpy(tokenCmd[i], tokPtr, 20);
+
+  while (*tokPtr != '\0') {
+    i++;
+    tokPtr = strtok(NULL, " ");
+    memcpy(tokenCmd[i], tokPtr, 20);
+  }
+
+
+  if (!(strcmp(tokenCmd[0], "i2c"))) {
+
+
+    if (!(strcmp(tokenCmd[1], "r"))) {
+
+      i = 0;
+      tokPtr = strtok(tokenCmd[2], ".");
+      memcpy(i2cTokenCmd[i], tokPtr, 3);
+      while (*tokPtr != '\0') {
+        i++;
+        tokPtr = strtok(NULL, ".");
+        memcpy(i2cTokenCmd[i], tokPtr, 4);
+      }
+
+      if (i != 3) {
+        // incorrect formatting of bus.addr.reg 
+        // print i2c usage
+      }
+
+      // think of a prettier way of doing this
+      if (tokenCmd[3][0] != '\0') {
+        // convert to number
+        // check to make sure it's less than 101
+        numOfBytes = string_to_number(tokenCmd[3], DEC);
+
+        if (numOfBytes > 100) {
+          // print number of bytes is too large and return
+        }
+      }
+      else
+        numOfBytes = 1;
+
+      i2cAddr = string_to_number(i2cTokenCmd[1], HEX);
+      i2cReg = string_to_number(i2cTokenCmd[2], HEX);
+
+      
+      // check if bus 0
+      if (!(strcmp(i2cTokenCmd[0], "0"))) {
+        i2c_read(i2cAddr, i2cReg, numOfBytes);
+
+        print_string("\r\nData: 0x%x", i2c_data);
+        while(1);
+      }
+      else {
+        // invalid bus number 
+        // print i2c usage
+      }
+
+      return;
+      
+    }
+
+    if (!(strcmp(tokenCmd[1], "w"))) {
+      // i2c write command, mimicing the read stuff above
+    }
+
+    if (tokenCmd[1] == NULL) {
+      // print out i2c buses / address info
+    }
+  }
+
+  if (!(strcmp(tokenCmd[0], "help"))) {
+    // print out command list w/ desc
+  }
+
+  if (!(strcmp(tokenCmd[0], "--help"))) {
+    // print out command list w/ desc
+  }
+  
+  if (tokenCmd[0] == NULL) {
+    // nothing was entered, just return
+  }
+  else {
+    // not a valid command, try "help" or "--help"
+  }
+}
+
 
 /*  process_input()
  *
@@ -104,8 +203,9 @@ void process_input() {
             j--;
           }
 
+          process_command();
 
-          print_string("\r\n");
+          print_string("\r\n> ");
           clear_string(cmdString[0], 60);
           cmdStringPos = 0;
           cmdStringEndPos = 0;
@@ -258,3 +358,4 @@ void process_input() {
 
   }
 }
+

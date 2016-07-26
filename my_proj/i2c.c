@@ -2,33 +2,10 @@
 #include "misc.h"
 #include "util.h"
 
-static int i2c_addr = 0x94;
 volatile int i2c_data = 0;
-volatile int i2c_data_flag = 0;
 
 void I2C1_IRQHandler()
 {
-	//print_string("here\n\r");
-	if (I2C1->SR1 & I2C_SR1_SB)
-	{
-		I2C1->DR = i2c_addr;
-	}
-	else
-	{
-		// potentially separate this into two actions
-		if ((I2C1->SR1 & I2C_SR1_ADDR) && !(I2C1->SR2 & I2C_SR2_TRA))
-		{
-			I2C1->CR1 &= ~(I2C_CR1_ACK);
-		}
-		else
-		{
-			if (I2C1->SR1 & I2C_SR1_RXNE)
-			{
-				i2c_data = I2C1->DR;
-				i2c_data_flag = 1;
-			}
-		}
-	}
 
 }
 
@@ -74,45 +51,41 @@ void I2C1_init()
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
 
-	NVIC_Init(&NVIC_InitStruct);
+	//NVIC_Init(&NVIC_InitStruct);
 
-	I2C1->CR2 |= I2C_CR2_ITEVTEN;						/* Interrupt enable */
+	//I2C1->CR2 |= I2C_CR2_ITEVTEN;						/* Interrupt enable */
 
 	I2C1->CR1 |= I2C_CR1_PE; 								/* I2C enable */
 
 	I2C1->CR1 |= I2C_CR1_ACK;
 
+	// take DAC chip out of reset
 	GPIOD->MODER |= (1 << 8);
-
 	GPIOD->ODR |= (1 << 4);
 
 }
 
 
-void i2c_read()
-{
+void i2c_read(int addr, int reg, int numOfBytes) {
 	/* 1. set start bit
 	 * 2. INT: read SR1 for SB and write DR register with address
 	 * 3. INT: read SR1 for ADDR  and read SR2 for TRA (1 for transmitted
 	 *  	and 0 for receive?). If only reading one byte, disable ack as well
 	 * 4. INT: RXNE is 1, read DR
 	 * 5. INT: same as four, when done, set ACK=0 and stop
-	 */
+	 */ 
 
 
-
-	/*I2C1->CR1 |= I2C_CR1_START;
+	I2C1->CR1 |= I2C_CR1_START;
 
 	while(!(I2C1->SR1 & I2C_SR1_SB));
 
-	I2C1->DR = 0x94;
+	I2C1->DR = addr;
 
 	while(!(I2C1->SR1 & I2C_SR1_ADDR));
 
 	if(I2C1->SR2 & I2C_SR2_TRA)
-	{
-		I2C1->DR = 0x01;
-	}
+		I2C1->DR = reg;
 
 
 	while(!(I2C1->SR1 & I2C_SR1_BTF));
@@ -126,15 +99,14 @@ void i2c_read()
 
 	while(!(I2C1->SR1 & I2C_SR1_SB));
 
-	I2C1->DR = 0x95;
+	I2C1->DR = (addr | 0x1);
 
 	while(!(I2C1->SR1 & I2C_SR1_ADDR));
 
 	// FOR ONLY READING ONE BYTE
 
 	I2C1->CR1 &= ~(I2C_CR1_ACK);
-	if(!(I2C1->SR2 & I2C_SR2_TRA))
-	{
+	if(!(I2C1->SR2 & I2C_SR2_TRA)) {
 		I2C1->CR1 |= I2C_CR1_STOP;
 		while(!(I2C1->SR1 & I2C_SR1_RXNE));
 		i2c_data = I2C1->DR;
@@ -143,9 +115,8 @@ void i2c_read()
 
 		I2C1->CR1 |= I2C_CR1_ACK;
 
-		i2c_data_flag = 1;
 	}
-*/
+
 
 	// I2C_CR1_ACK
 	// I2C_DR, (RXNE), not empty
