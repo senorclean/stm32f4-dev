@@ -9,18 +9,18 @@
 #define I2C3 						I2C3_BASE
 
 /***** I2C Regs *********************************************************/
-#define I2C_CR1(i2c_base) 			MMIO32(i2c_base + 0x00)
+#define I2C_CR1(i2c_base) 			MMIO16(i2c_base + 0x00)
 // #define I2C1_CR1 					I2C_CR1(I2C1_BASE)
 // #define I2C2_CR1 					I2C_CR1(I2C2_BASE)			
-#define I2C_CR2(i2c_base) 			MMIO32(i2c_base + 0x04)
-#define I2C_OAR1(i2c_base)			MMIO32(i2c_base + 0x08)
-#define I2C_OAR2(i2c_base) 			MMIO32(i2c_base + 0x0C)
-#define I2C_DR(i2c_base) 			MMIO32(i2c_base + 0x10)
-#define I2C_SR1(i2c_base) 			MMIO32(i2c_base + 0x14)
-#define I2C_SR2(i2c_base) 			MMIO32(i2c_base + 0x18)
-#define I2C_CCR(i2c_base) 			MMIO32(i2c_base + 0x1C)
-#define I2C_TRISE(i2c_base) 		MMIO32(i2c_base + 0x20)
-#define I2C_FLTR(i2c_base) 			MMIO32(i2c_base + 0x24)
+#define I2C_CR2(i2c_base) 			MMIO16(i2c_base + 0x04)
+#define I2C_OAR1(i2c_base)			MMIO16(i2c_base + 0x08)
+#define I2C_OAR2(i2c_base) 			MMIO16(i2c_base + 0x0C)
+#define I2C_DR(i2c_base) 				MMIO16(i2c_base + 0x10)
+#define I2C_SR1(i2c_base) 			MMIO16(i2c_base + 0x14)
+#define I2C_SR2(i2c_base) 			MMIO16(i2c_base + 0x18)
+#define I2C_CCR(i2c_base) 			MMIO16(i2c_base + 0x1C)
+#define I2C_TRISE(i2c_base) 		MMIO16(i2c_base + 0x20)
+#define I2C_FLTR(i2c_base) 			MMIO16(i2c_base + 0x24)
 
 /***** I2C CR1 Regs *****************************************************/
 #define I2C_CR1_SWRST 				(1 << 15)

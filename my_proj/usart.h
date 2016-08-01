@@ -13,8 +13,8 @@
 #define USART6 						USART6_BASE
 
 /***** USART Regs *******************************************************/
-#define USART_SR(usart_base) 		MMIO32(usart_base + 0x00)
-#define USART_DR(usart_base) 		MMIO32(usart_base + 0x04)
+#define USART_SR(usart_base) 			MMIO32(usart_base + 0x00)
+#define USART_DR(usart_base) 			MMIO32(usart_base + 0x04)
 #define USART_BRR(usart_base) 		MMIO32(usart_base + 0x08)
 #define USART_CR1(usart_base) 		MMIO32(usart_base + 0x0C)
 #define USART_CR2(usart_base) 		MMIO32(usart_base + 0x10)

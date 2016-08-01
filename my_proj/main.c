@@ -15,6 +15,7 @@
 // substitute things in stm32... file with mine and make sure it works
 	// verify USART works as well
 	// download NVIC doc
+	// alter MMIOs for correct reg sizes and make sure everything works
 // get I2C working with audio chip on sch
   // figure out how to change I2Cx based on bus number
   // setup write
@@ -31,8 +32,7 @@
 #define HSE_VALUE ((uint32_t)8000000)
 
 /* Ghetto delay */
-/*void ms_delay(int ms)
-{
+/*void ms_delay(int ms) {
    while (ms-- > 0) {
       volatile int x=5971;
       while (x-- > 0)
@@ -42,17 +42,15 @@
 
 
 /********************************* Main Loop *********************************/
-int main(void)
-{
+int main(void) {
 
   led_init();
   TIM3_delay_ms_init();
   TIM4_init();
-  //USART2_init();
-  //I2C1_init();
+  USART2_init();
+  I2C1_init();
 
-  while (1)
-  {
+  while (1) {
     scheduler();
   }
 }

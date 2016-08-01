@@ -6,17 +6,8 @@
 
 volatile int i2c_data = 0;
 
-void I2C1_IRQHandler()
-{
-
-}
-
-
 void I2C1_init()
 {
-	//NVIC_InitTypeDef NVIC_InitStruct;
-
-
 
 	RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
 	RCC_APB1ENR |= RCC_APB1ENR_I2C1EN;
@@ -25,33 +16,22 @@ void I2C1_init()
 	GPIO_MODER(GPIOB) |= GPIO_MODE(6, GPIO_MODE_AF);               /* PB6 used as alt func */
 	GPIO_MODER(GPIOB) |= GPIO_MODE(9, GPIO_MODE_AF);               /* PB9 used as alt func */
 
-	GPIO_OTYPER(GPIOB) |= GPIO_OSPEED(6, GPIO_OSPEED_50MHZ);
-	GPIO_OTYPER(GPIOB) |= GPIO_OSPEED(9, GPIO_OSPEED_50MHZ);
+	GPIO_OTYPER(GPIOB) |= GPIO_OTYPE(6, GPIO_TYPE_OD);
+	GPIO_OTYPER(GPIOB) |= GPIO_OTYPE(9, GPIO_TYPE_OD);
 
 	GPIO_AFRL(GPIOB) |= GPIO_AFR(6, GPIO_AF4);              /* PB6 as AF4 (I2C) function */
-	GPIO_AFRH(GPIOB) |= GPIO_AFR(2, GPIO_AF4);               /* PB9 as AF4 (I2C) function */
+	GPIO_AFRH(GPIOB) |= GPIO_AFR(1, GPIO_AF4);               /* PB9 as AF4 (I2C) function */
 
 	RCC_APB1RSTR |= RCC_APB1RSTR_I2C1RST;
 	RCC_APB1RSTR &= ~(RCC_APB1RSTR_I2C1RST);
 
 	I2C_CR2(I2C1) = I2C_CR2_FREQ_42MHZ;  												/* (for 42MHz APB1 clock freq) */
 	I2C_CCR(I2C1) |= 210;												/* 100KHz clock speed */
-	I2C_TRISE(I2C1) = 43; 											/* Max Trise time = APB1 freq + 1 */
-
-
-	//NVIC_ISER(NVIC_I2C1_IRQ);
-	/*NVIC_InitStruct.NVIC_IRQChannel = I2C1_EV_IRQn;
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;*/
-
-	//NVIC_Init(&NVIC_InitStruct);
-
-	//I2C1->CR2 |= I2C_CR2_ITEVTEN;						/* Interrupt enable */
+	I2C_TRISE(I2C1) = (I2C_CR2_FREQ_42MHZ + 1); 											/* Max Trise time = APB1 freq + 1 */
 
 	I2C_CR1(I2C1) |= I2C_CR1_PE; 								/* I2C enable */
 
-	//I2C1_CR1(I2C1) |= I2C_CR1_ACK;
+	I2C_CR1(I2C1) |= I2C_CR1_ACK;
 
 	// take DAC chip out of reset
 	GPIO_MODER(GPIOD) |= GPIO_MODE(4, GPIO_MODE_OUTPUT);
@@ -68,7 +48,6 @@ void i2c_read(int addr, int reg, int numOfBytes) {
 	 * 4. INT: RXNE is 1, read DR
 	 * 5. INT: same as four, when done, set ACK=0 and stop
 	 */ 
-
 
 	I2C_CR1(I2C1) |= I2C_CR1_START;
 
@@ -87,7 +66,6 @@ void i2c_read(int addr, int reg, int numOfBytes) {
 	I2C_CR1(I2C1) |= I2C_CR1_STOP;
 
 	while(I2C_SR2(I2C1) & I2C_SR2_BUSY);
-
 
 	I2C_CR1(I2C1) |= I2C_CR1_START;
 
