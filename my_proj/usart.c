@@ -1,5 +1,8 @@
-#include "misc.h"
-#include "stm32f4xx.h"
+#include "memorymap.h"
+#include "rcc.h"
+#include "gpio.h"
+#include "usart.h"
+#include "nvic.h"
 
 #define APB1_CLK ((uint32_t)42000000)
 #define BUF_SIZE ((uint8_t)255)
@@ -10,9 +13,9 @@ volatile char inputData[BUF_SIZE] = "";
 
 void USART2_IRQHandler()            /* function name defined in startup file */
 {
-  while (USART2->SR & (USART_SR_RXNE | USART_SR_ORE))
+  while (USART_SR(USART2) & (USART_SR_RXNE | USART_SR_ORE))
   {
-    inputData[head] = USART2->DR;
+    inputData[head] = USART_DR(USART2);
 
     if (inputData[head] == 0x3)             /* input is Ctrl + C */
     {
@@ -65,23 +68,22 @@ void USART2_init()
   uint32_t div_value = 0;
   uint32_t temp = 0;
   uint32_t frac_value = 0;
-  NVIC_InitTypeDef NVIC_InitStruct;
   
   uint32_t baud = 115200;
   
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-  RCC->APB1ENR |= RCC_APB1ENR_USART2EN; 
+  RCC_AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+  RCC_APB1ENR |= RCC_APB1ENR_USART2EN; 
 
   /*  PA2 = USART2 TX
    *  PA3 = USART2 RX
    */
-  GPIOA->MODER |= (1 << 5);               /* PA2 used as alt func */
-  GPIOA->MODER |= (1 << 7);               /* PA3 used as alt func */
-  GPIOA->AFR[0] |= (7 << 8);              /* PA2 as AF7 (USART) function */
-  GPIOA->AFR[0] |= (7 << 12);             /* PA3 as AF7 (USART) function */
+  GPIO_MODER(GPIOA) |= GPIO_MODE(2, GPIO_MODE_AF);               /* PA2 used as alt func */
+  GPIO_MODER(GPIOA) |= GPIO_MODE(3, GPIO_MODE_AF);               /* PA3 used as alt func */
+  GPIO_AFRL(GPIOA) |= GPIO_AFR(2, GPIO_AF7);              /* PA2 as AF7 (USART) function */
+  GPIO_AFRL(GPIOA) |= GPIO_AFR(3, GPIO_AF7);             /* PA3 as AF7 (USART) function */
 
-  USART2->CR1 &= ~(USART_CR1_M);          /* Word length = 8 bits */
-  USART2->CR2 &= ~(USART_CR2_STOP);       /* 1 stop bit */
+  USART_CR1(USART2) &= ~(USART_CR1_M);          /* Word length = 8 bits */
+  USART_CR2(USART2) &= ~(USART_CR2_STOPBITS_0_5);       /* 1 stop bit */
  
   /*  Same as eq at 30.3.4 of ref manual but modified to prevent div_value
    *  from getting too large before dividing
@@ -94,18 +96,12 @@ void USART2_init()
 
   div_value |= (((frac_value * 16)/100) & 0x0F);
 
-  USART2->BRR = div_value;
+  USART_BRR(USART2) = div_value;
 
-  USART2->CR1 |= USART_CR1_RE;
-  USART2->CR1 |= USART_CR1_TE;
-  USART2->CR1 |= USART_CR1_RXNEIE;
+  USART_CR1(USART2) |= (USART_CR1_RE | USART_CR1_TE | USART_CR1_RXNEIE);
 
-  NVIC_InitStruct.NVIC_IRQChannel = USART2_IRQn;
-  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_IPR((NVIC_USART2_IRQ / 4) + (NVIC_USART2_IRQ % 4)) = 0x10;
+  NVIC_ISER(NVIC_USART2_IRQ / 32) = (1 << (NVIC_USART2_IRQ % 32));
 
-  NVIC_Init(&NVIC_InitStruct);
-
-  USART2->CR1 |= USART_CR1_UE;    
+  USART_CR1(USART2) |= USART_CR1_UE;    
 }

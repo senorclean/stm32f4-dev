@@ -1,4 +1,4 @@
-#include "stm32f4xx.h"
+#include "usart.h"
 #include <stdarg.h>
 
 
@@ -188,6 +188,19 @@ int string_to_number(char *str, int base) {
 }
 
 
+/*  print_char()
+ *
+ *  Takes a single character as input and prints it out. Will likely be
+ *  deprecated as print_string() can also perform this task
+ *
+ *  Returns: Nothing  
+ */
+
+void print_char(char data) {
+  while(!(USART_SR(USART2) & USART_SR_TXE));
+  USART_DR(USART2) = data;
+}
+
 
 /*  print_string()
  *
@@ -217,8 +230,7 @@ void print_string(char *data, ...) {
 
           j = 0;
           while(tempArray[j] != '\0') {
-            while(!(USART2->SR & USART_SR_TXE));
-            USART2->DR = tempArray[j];
+            print_char(tempArray[j]);
             j++; 
           }
 
@@ -230,8 +242,7 @@ void print_string(char *data, ...) {
 
           j = 0;
           while (*(tempStr + j) != '\0') {
-            while(!(USART2->SR & USART_SR_TXE));
-            USART2->DR = *(tempStr + j);
+            print_char(*(tempStr + j));
             j++; 
           }
           break;
@@ -245,8 +256,7 @@ void print_string(char *data, ...) {
 
           j = 0;
           while(tempArray[j] != '\0') {
-            while(!(USART2->SR & USART_SR_TXE));
-            USART2->DR = tempArray[j];
+            print_char(tempArray[j]);
             j++; 
           }
 
@@ -260,25 +270,10 @@ void print_string(char *data, ...) {
       i++;
     }
     else {
-      while(!(USART2->SR & USART_SR_TXE));
-      USART2->DR = data[i];
+      print_char(data[i]);
       i++; 
     } 
   }
 
   va_end(args);  
-}
-
-
-/*  print_char()
- *
- *  Takes a single character as input and prints it out. Will likely be
- *  deprecated as print_string() can also perform this task
- *
- *  Returns: Nothing  
- */
-
-void print_char(char data) {
-  while(!(USART2->SR & USART_SR_TXE));
-  USART2->DR = data;
 }

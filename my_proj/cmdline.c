@@ -1,8 +1,7 @@
-#include "my_usart.h"
+#include "usart.h"
 #include "util.h"
 #include "i2c.h"
 #include <string.h>
-#include <math.h>
 
 #define BUF_SIZE ((uint8_t)255)
 #define MAX_HISTORY ((uint8_t)21)

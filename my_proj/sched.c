@@ -1,9 +1,6 @@
-#include "my_usart.h"
 #include "cmdline.h"
 #include "timer.h"
 #include "heartbeat.h"
-#include "my_gpio.h"
-#include "i2c.h"
 
 #define MAX_16BIT_INT_SIZE ((uint16_t)65535)
 
@@ -15,7 +12,7 @@ typedef struct {
 
 static func_t funcArray[2] = 	{
                     						{heartbeat, 0, 10},
-                    						{process_input, 0, 1},
+                    						{process_input, 0, 1}
                   						};
 
 

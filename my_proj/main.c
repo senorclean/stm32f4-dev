@@ -1,11 +1,10 @@
 /* Uncomment this STDPERIPH line in stm32f4xx.h otherwise linking issues */
-#define USE_STDPERIPH_DRIVER
+//#define USE_STDPERIPH_DRIVER
 
 #include "stdint.h"
-#include "stm32f4xx.h"
-#include "my_usart.h"
+#include "usart.h"
 #include "timer.h"
-#include "my_gpio.h"
+#include "gpio.h"
 #include "sched.h"
 #include "util.h"
 #include "i2c.h"
@@ -13,8 +12,9 @@
 /* REMEMBER THE RCC FOR INTERRUPTS/GPIOS/ANYTHING!! */
 
 /* TO DO: */
-// removed extern from timer.h (if something broke)
-// check that hex_to_ascii still works
+// substitute things in stm32... file with mine and make sure it works
+	// verify USART works as well
+	// download NVIC doc
 // get I2C working with audio chip on sch
   // figure out how to change I2Cx based on bus number
   // setup write
@@ -48,8 +48,8 @@ int main(void)
   led_init();
   TIM3_delay_ms_init();
   TIM4_init();
-  USART2_init();
-  I2C1_init();
+  //USART2_init();
+  //I2C1_init();
 
   while (1)
   {

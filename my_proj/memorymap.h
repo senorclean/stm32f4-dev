@@ -3,20 +3,24 @@
 
 #include <stdint.h>
 
-/* Memory-mapped I/O macros */
+/***** Memory-mapped I/O macros ******************************************/
 #define MMIO8(addr)					(*(volatile uint8_t *)(addr))
 #define MMIO16(addr)				(*(volatile uint16_t *)(addr))
 #define MMIO32(addr)				(*(volatile uint32_t *)(addr))
 #define MMIO64(addr)				(*(volatile uint64_t *)(addr))
 
+/***** NVIC Base *********************************************************/
+#define NVIC_BASE 											0xE000E100
 
-/* Peripheral bus map */
+/***** Periphal base addresses *******************************************/
+
+/***** Peripheral bus map *********************************/
 #define PERIPH_BASE_APB1			0x40000000
 #define PERIPH_BASE_APB2			0x40010000
 #define PERIPH_BASE_AHB1			0x40020000
 #define PERIPH_BASE_AHB2 			0x50000000
 
-/* APB1 Peripheral Map */
+/****** APB1 Peripheral Map *******************************/
 #define TIM2_BASE 					(PERIPH_BASE_APB1 + 0x0000)
 #define TIM3_BASE 					(PERIPH_BASE_APB1 + 0x0400)
 #define TIM4_BASE 					(PERIPH_BASE_APB1 + 0x0800)
@@ -79,18 +83,16 @@
 #define SPI6_BASE					(PERIPH_BASE_APB2 + 0x5400)
 
 
-/* AHB1 Peripheral Map */
-#define GPIO_PORTA_BASE					(PERIPH_BASE_AHB1 + 0x0000)
-#define GPIO_PORTB_BASE					(PERIPH_BASE_AHB1 + 0x0400)
-#define GPIO_PORTC_BASE					(PERIPH_BASE_AHB1 + 0x0800)
-#define GPIO_PORTD_BASE					(PERIPH_BASE_AHB1 + 0x0C00)
-#define GPIO_PORTE_BASE					(PERIPH_BASE_AHB1 + 0x1000)
-#define GPIO_PORTF_BASE					(PERIPH_BASE_AHB1 + 0x1400)
-#define GPIO_PORTG_BASE					(PERIPH_BASE_AHB1 + 0x1800)
-#define GPIO_PORTH_BASE					(PERIPH_BASE_AHB1 + 0x1C00)
-#define GPIO_PORTI_BASE					(PERIPH_BASE_AHB1 + 0x2000)
-#define GPIO_PORTJ_BASE					(PERIPH_BASE_AHB1 + 0x2400)
-#define GPIO_PORTK_BASE					(PERIPH_BASE_AHB1 + 0x2800)
+/***** AHB1 Peripheral Map ***********************************/
+#define GPIO_PORTA_BASE				(PERIPH_BASE_AHB1 + 0x0000)
+#define GPIO_PORTB_BASE				(PERIPH_BASE_AHB1 + 0x0400)
+#define GPIO_PORTC_BASE				(PERIPH_BASE_AHB1 + 0x0800)
+#define GPIO_PORTD_BASE				(PERIPH_BASE_AHB1 + 0x0C00)
+#define GPIO_PORTE_BASE				(PERIPH_BASE_AHB1 + 0x1000)
+#define GPIO_PORTF_BASE				(PERIPH_BASE_AHB1 + 0x1400)
+#define GPIO_PORTG_BASE				(PERIPH_BASE_AHB1 + 0x1800)
+#define GPIO_PORTH_BASE				(PERIPH_BASE_AHB1 + 0x1C00)
+#define GPIO_PORTI_BASE				(PERIPH_BASE_AHB1 + 0x2000)
 
 #define CRC_BASE					(PERIPH_BASE_AHB1 + 0x3000)
 #define RCC_BASE					(PERIPH_BASE_AHB1 + 0x3800)
@@ -103,23 +105,9 @@
 #define USB_OTG_HS_BASE				(PERIPH_BASE_AHB1 + 0x20000)
 
 
-/* AHB2 Peripheral Map */
+/***** AHB2 Peripheral Map ***********************************/
 #define USB_OTG_FS_BASE				(PERIPH_BASE_AHB2 + 0x0000)
 #define DCMI_BASE					(PERIPH_BASE_AHB2 + 0x50000)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif
