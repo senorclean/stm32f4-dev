@@ -10,10 +10,24 @@
  *  Returns: Nothing  
  */
 
-void clear_string(char *cmdStringPtr, int iterations) {
+void clear_string(char *cmdStringPtr, int iterations, int start) {
   int i;
-  for(i = 0; i < iterations; i++)
+  for(i = start; i < iterations; i++)
     cmdStringPtr[i] = '\0';
+}
+
+
+/*  print_char()
+ *
+ *  Takes a single character as input and prints it out. Will likely be
+ *  deprecated as print_string() can also perform this task
+ *
+ *  Returns: Nothing  
+ */
+
+void print_char(char data) {
+  while(!(USART_SR(USART2) & USART_SR_TXE));
+  USART_DR(USART2) = data;
 }
 
 
@@ -153,6 +167,12 @@ void hex_to_ascii(int value, char *tempArray) {
 
   if (i > 1)
     reverse_array(tempArray);
+  else {
+    // to keep single numbered values to two spaces
+    tempArray[1] = tempArray[0];
+    tempArray[0] = '0';
+    i++;
+  }
 
   if (tempArray[i] != '\0')
     tempArray[i] = '\0';
@@ -171,34 +191,62 @@ int exponent(int number, int exp) {
 }
 
 
-int string_to_number(char *str, int base) {
-  int tempInt = 0;
+uint32_t string_to_number(char *str, int base) {
+  uint32_t tempInt = 0;
   int i = 0;
-  int j = 0;
 
   while (str[i] != '\0') {
-    for (j = i; j > 0; j--)
-      tempInt *= exponent(base, j);
+    if (i > 0) {
+      tempInt *= base; 
+    }
 
-    tempInt += str[i] - 48;
-    i++;
+    if (str[i] < 58) {
+      tempInt += str[i] - 48;
+    }
+    else {
+      switch (str[i]) {
+        case 'a':
+
+        case 'A':
+          tempInt += 10;
+          break;
+
+        case 'b':
+
+        case 'B':
+          tempInt += 11;
+          break;
+
+        case 'c':
+
+        case 'C':
+          tempInt += 12;
+          break;
+
+        case 'd':
+
+        case 'D':
+          tempInt += 13;
+          break;
+
+        case 'e':
+
+        case 'E':
+          tempInt += 14;
+          break;
+
+        case 'f':
+
+        case 'F':
+          tempInt += 15;
+          break;
+      }
+    }
+
+    i++; 
   }
 
   return tempInt;
-}
-
-
-/*  print_char()
- *
- *  Takes a single character as input and prints it out. Will likely be
- *  deprecated as print_string() can also perform this task
- *
- *  Returns: Nothing  
- */
-
-void print_char(char data) {
-  while(!(USART_SR(USART2) & USART_SR_TXE));
-  USART_DR(USART2) = data;
 }
 
 
@@ -260,7 +308,6 @@ void print_string(char *data, ...) {
             j++; 
           }
 
-          //clear_string(tempArray, 10);
           break;
 
         default:

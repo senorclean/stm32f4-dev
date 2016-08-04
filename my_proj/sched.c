@@ -20,9 +20,9 @@ void scheduler() {
 	int i;
 
 	for (i = 0; i < (sizeof(funcArray) / sizeof(funcArray[0])); i++) {
-		if (counter >= funcArray[i].timeStamp) {
+		if (tim3Counter >= funcArray[i].timeStamp) {
 			funcArray[i].f();
-			funcArray[i].timeStamp = (counter + funcArray[i].period) \
+			funcArray[i].timeStamp = (tim3Counter + funcArray[i].period) \
 																% MAX_16BIT_INT_SIZE;
 		}
 	}

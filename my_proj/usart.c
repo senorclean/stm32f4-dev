@@ -4,7 +4,7 @@
 #include "usart.h"
 #include "nvic.h"
 
-#define APB1_CLK ((uint32_t)42000000)
+#define APB1_CLK_PERIPH ((uint32_t)42000000)
 #define BUF_SIZE ((uint8_t)255)
 
 volatile uint8_t head = 0;
@@ -88,7 +88,7 @@ void USART2_init()
   /*  Same as eq at 30.3.4 of ref manual but modified to prevent div_value
    *  from getting too large before dividing
    */
-  div_value = ((APB1_CLK*25)/(4*baud));
+  div_value = ((APB1_CLK_PERIPH*25)/(4*baud));
 
   temp = (div_value/100);
   frac_value = div_value - (100*temp);
@@ -100,7 +100,7 @@ void USART2_init()
 
   USART_CR1(USART2) |= (USART_CR1_RE | USART_CR1_TE | USART_CR1_RXNEIE);
 
-  NVIC_IPR((NVIC_USART2_IRQ / 4) + (NVIC_USART2_IRQ % 4)) = 0x10;
+  NVIC_IPR((NVIC_USART2_IRQ / 4) + (NVIC_USART2_IRQ % 4)) = 0x20;
   NVIC_ISER(NVIC_USART2_IRQ / 32) = (1 << (NVIC_USART2_IRQ % 32));
 
   USART_CR1(USART2) |= USART_CR1_UE;    

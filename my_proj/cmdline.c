@@ -15,8 +15,15 @@ static uint8_t cmdStringPos = 0;
 static uint8_t cmdStringEndPos = 0;
 static uint8_t cmdHistPos = 0;
 static uint8_t cmdHistEndPos = 0;
+static uint8_t i2cBusTotal = 1;
 
+static const char i2c_buses[] =
+"0.94 CS43L22 DAC\n\r"
+"";
 
+static const char help_cmd[] =
+"i2c [r|w]                      - I2C commands\r\n"
+"";
 
 /*  display_cmd_string()
  *
@@ -70,6 +77,9 @@ void process_command() {
   int i;
   int i2cAddr = 0;
   int i2cReg = 0;
+  int i2cBus = 0;
+  uint32_t i2cData = 0;
+  uint32_t i2cMasterBus = 0;
   int numOfBytes = 0;
   char tokenCmd[11][21] = {""};
   char i2cTokenCmd[5][4] = {""};
@@ -100,9 +110,17 @@ void process_command() {
         memcpy(i2cTokenCmd[i], tokPtr, 4);
       }
 
+      i2cBus = string_to_number(i2cTokenCmd[0], HEX);
+      if (i2cBus >= i2cBusTotal) {
+        print_string("\r\nError: Not a valid bus number");
+        return;
+      }
+
       if (i != 3) {
-        // incorrect formatting of bus.addr.reg 
-        // print i2c usage
+        print_string("\r\nError: Incorrect formatting of bus.addr.reg");
+        print_string("\r\nI2C Usage: i2c r <bus>.<addr>.<reg>" \
+          " <number of bytes>");
+        return;
       }
 
       // think of a prettier way of doing this
@@ -112,53 +130,115 @@ void process_command() {
         numOfBytes = string_to_number(tokenCmd[3], DEC);
 
         if (numOfBytes > 100) {
-          // print number of bytes is too large and return
+          print_string("\r\nError: Max number of bytes is 100");
+          return;
         }
       }
       else
         numOfBytes = 1;
 
+
+      switch(i2cBus) {
+        case 0:
+          i2cMasterBus = I2C1;
+          break;
+
+        case 1:
+          i2cMasterBus = I2C2;
+          break;
+
+        case 2:
+          i2cMasterBus = I2C3;
+          break;
+      }
+
       i2cAddr = string_to_number(i2cTokenCmd[1], HEX);
       i2cReg = string_to_number(i2cTokenCmd[2], HEX);
 
       
-      // check if bus 0
-      if (!(strcmp(i2cTokenCmd[0], "0"))) {
-        i2c_read(i2cAddr, i2cReg, numOfBytes);
+      i2c_read(i2cMasterBus, i2cAddr, i2cReg, numOfBytes);
 
-        print_string("\r\nData: 0x%x", i2c_data);
-        while(1);
-      }
-      else {
-        // invalid bus number 
-        // print i2c usage
-      }
+      print_string("\r\nData: 0x");
 
+      i = 0;
+      while (numOfBytes > 0) {
+        print_string("%x", i2cBuff[i]);
+        numOfBytes--;
+        i++;
+      }
+      
       return;
       
     }
 
     if (!(strcmp(tokenCmd[1], "w"))) {
-      // i2c write command, mimicing the read stuff above
+
+      i = 0;
+      tokPtr = strtok(tokenCmd[2], ".");
+      memcpy(i2cTokenCmd[i], tokPtr, 3);
+      while (*tokPtr != '\0') {
+        i++;
+        tokPtr = strtok(NULL, ".");
+        memcpy(i2cTokenCmd[i], tokPtr, 8);
+      }
+
+      i2cBus = string_to_number(i2cTokenCmd[0], HEX);
+      if (i2cBus >= i2cBusTotal) {
+        print_string("\r\nError: Not a valid bus number");
+        return;
+      }
+
+      if (i != 4) {
+        print_string("\r\nError: Incorrect formatting of bus.addr.reg");
+        print_string("\r\nI2C Usage: i2c w <bus>.<addr>.<reg>.<data>");
+        return;
+      }
+
+      switch(i2cBus) {
+        case 0:
+          i2cMasterBus = I2C1;
+          break;
+
+        case 1:
+          i2cMasterBus = I2C2;
+          break;
+
+        case 2:
+          i2cMasterBus = I2C3;
+          break;
+      }
+
+      i2cAddr = string_to_number(i2cTokenCmd[1], HEX);
+      i2cReg = string_to_number(i2cTokenCmd[2], HEX);
+      i2cData = string_to_number(i2cTokenCmd[3], HEX);
+
+      i2c_write(i2cMasterBus, i2cAddr, i2cReg, i2cData);
+      
+      return;
     }
 
-    if (tokenCmd[1] == NULL) {
-      // print out i2c buses / address info
+    if (tokenCmd[1][0] == '\0') {
+      print_string("\r\nI2C Buses:\r\n%s", i2c_buses);
+      return;
     }
   }
 
   if (!(strcmp(tokenCmd[0], "help"))) {
-    // print out command list w/ desc
+    print_string("\r\n%s", help_cmd);
+    return;
   }
 
   if (!(strcmp(tokenCmd[0], "--help"))) {
-    // print out command list w/ desc
+    print_string("\r\n%s", help_cmd);
+    return;
   }
   
-  if (tokenCmd[0] == NULL) {
-    // nothing was entered, just return
+  if (tokenCmd[0][0] == '\0') {
+    // nothing was entered, just ret
   }
   else {
+    print_string("\r\nError: Not a valid command");
+    print_string("\r\nTry help or --help");
     // not a valid command, try "help" or "--help"
   }
 }
@@ -193,7 +273,7 @@ void process_input() {
           j = cmdHistEndPos;
           while (j > 0) {
             i = 0;
-            clear_string(cmdString[j], 60);
+            clear_string(cmdString[j], BUF_SIZE, 0);
             while (cmdString[j - 1][i] != '\0') {
               cmdString[j][i] = cmdString[j - 1][i];
               i++;
@@ -205,7 +285,8 @@ void process_input() {
           process_command();
 
           print_string("\r\n> ");
-          clear_string(cmdString[0], 60);
+          clear_string(cmdString[0], BUF_SIZE, 0);
+
           cmdStringPos = 0;
           cmdStringEndPos = 0;
           cmdHistPos = 0;
@@ -297,8 +378,8 @@ void process_input() {
               cmdStringPos = i;
               cmdStringEndPos = i;
 
-              cmdString[0][i] = '\0';
-
+              clear_string(cmdString[0], (BUF_SIZE - cmdStringEndPos), 
+                           cmdStringPos); 
             }
             break;
 
@@ -307,7 +388,7 @@ void process_input() {
               cmdHistPos--;
 
               if ((cmdHistPos == 0) && (cmdHistEndPos != 0)) {
-                clear_string(cmdString[0], 60);
+                clear_string(cmdString[0], (BUF_SIZE - cmdStringEndPos), 0);
 
                 cmdStringPos = 0;
                 cmdStringEndPos = 0;
@@ -324,8 +405,8 @@ void process_input() {
               cmdStringPos = i;
               cmdStringEndPos = i;
 
-              cmdString[0][i] = '\0';
-
+              clear_string(cmdString[0], (BUF_SIZE - cmdStringEndPos), 
+                           cmdStringPos);
             }
             break;
 

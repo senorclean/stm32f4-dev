@@ -16,6 +16,7 @@
 
 #define RCC_APB1ENR_I2C1EN 					(1 << 21)
 #define RCC_APB1ENR_USART2EN 				(1 << 17)
+#define RCC_APB1ENR_TIM5EN 					(1 << 3)
 #define RCC_APB1ENR_TIM4EN 					(1 << 2)
 #define RCC_APB1ENR_TIM3EN 					(1 << 1)
 

@@ -1,29 +1,21 @@
-/* Uncomment this STDPERIPH line in stm32f4xx.h otherwise linking issues */
-//#define USE_STDPERIPH_DRIVER
-
 #include "stdint.h"
 #include "usart.h"
 #include "timer.h"
 #include "gpio.h"
 #include "sched.h"
-#include "util.h"
 #include "i2c.h"
-
-/* REMEMBER THE RCC FOR INTERRUPTS/GPIOS/ANYTHING!! */
+#include "util.h"
 
 /* TO DO: */
-// substitute things in stm32... file with mine and make sure it works
-	// verify USART works as well
-	// download NVIC doc
-	// alter MMIOs for correct reg sizes and make sure everything works
 // get I2C working with audio chip on sch
-  // figure out how to change I2Cx based on bus number
-  // setup write
+	// test out commands (mostly done, need to try writes)
+  // figure out how to change I2Cx based on bus number (done)
+  // setup write / multiple bytes
+	// setup read to do multiple bytes (done)
 // setup board.h file with a board_init() for disc board specific stuff
 // enable DMA for USART for cmd line
 // get some error checking going on
 // recomment my code
-// figure out how to enable interrupts without NVIC
 // put chip into low power modes and take it out
 // configure USB1 for ACM capability (it can talk USART as well)
 // get EEPROM/SPI-RJ45 for SPI functionality
@@ -45,8 +37,9 @@
 int main(void) {
 
   led_init();
-  TIM3_delay_ms_init();
+  TIM3_init();
   TIM4_init();
+  TIM5_init();
   USART2_init();
   I2C1_init();
 

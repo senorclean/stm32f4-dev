@@ -345,9 +345,11 @@
 
 
 /***** Variables and Function Prototypes ******************************/
-volatile uint16_t counter;
+volatile uint16_t tim3Counter;
+volatile uint32_t tim5Counter;
 
-void TIM3_delay_ms_init();
+void TIM3_init();
 void TIM4_init();
+void TIM5_init();
 
 #endif
