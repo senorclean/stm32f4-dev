@@ -36,34 +36,7 @@ void USART2_IRQHandler()            /* function name defined in startup file */
 }
 
 
-/*  USART2_init()
- *
- *  Holy mother of fuck was this frustrating.
- *
- *  1. Enable the peripheral clock for the GPIO bank you're using
- *    (USART2 uses GPIOA bank)
- *  2. Enable the USART clock based on the specific USART you're using
- *  3. Setup the GPIO modes so that they're "alternate function"
- *  4. Edit GPIO alternate function register to make them USART specifically
- *  5. Set word length to 8 bits
- *  6. Set stop bit to 1
- *  7. Set baud rate (side note: fuck the STM datasheet)
- *  8. Enable the TX and RX for USART2
- *  9. Optionally enable the TX/RX interrupts
- *  10. Enable USART2 itself
- *
- *
- *  Baud rate notes:
- *  - fclk is peripheral clk which is the system clock prescaled by 4 because
- *  we're not operating in low power mode. this is 42MHz
- *  - make sure that you have a clear #define 8MHz line for the HSE_CLK because
- *  the default discovery board files have it set as 25MHz because they're 
- *  morons
- *
- *  Returns: Nothing
- */
-
-void USART2_init()
+void usart2_init()
 {
   uint32_t div_value = 0;
   uint32_t temp = 0;
@@ -77,13 +50,13 @@ void USART2_init()
   /*  PA2 = USART2 TX
    *  PA3 = USART2 RX
    */
-  GPIO_MODER(GPIOA) |= GPIO_MODE(2, GPIO_MODE_AF);               /* PA2 used as alt func */
-  GPIO_MODER(GPIOA) |= GPIO_MODE(3, GPIO_MODE_AF);               /* PA3 used as alt func */
-  GPIO_AFRL(GPIOA) |= GPIO_AFR(2, GPIO_AF7);              /* PA2 as AF7 (USART) function */
-  GPIO_AFRL(GPIOA) |= GPIO_AFR(3, GPIO_AF7);             /* PA3 as AF7 (USART) function */
+  GPIO_MODER(GPIOA) |= GPIO_MODE(2, GPIO_MODE_AF);               
+  GPIO_MODER(GPIOA) |= GPIO_MODE(3, GPIO_MODE_AF);               
+  GPIO_AFRL(GPIOA) |= GPIO_AFR(2, GPIO_AF7);              
+  GPIO_AFRL(GPIOA) |= GPIO_AFR(3, GPIO_AF7);             
 
-  USART_CR1(USART2) &= ~(USART_CR1_M);          /* Word length = 8 bits */
-  USART_CR2(USART2) &= ~(USART_CR2_STOPBITS_0_5);       /* 1 stop bit */
+  USART_CR1(USART2) &= ~(USART_CR1_M);          
+  USART_CR2(USART2) &= ~(USART_CR2_STOPBITS_0_5);       
  
   /*  Same as eq at 30.3.4 of ref manual but modified to prevent div_value
    *  from getting too large before dividing

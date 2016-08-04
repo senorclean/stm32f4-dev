@@ -87,7 +87,7 @@
 /***** Variables and Function Prototypes *********************************/
 volatile uint8_t i2cBuff[101];
 
-void I2C1_init();
+void i2c1_init();
 void i2c_read(uint32_t bus, int addr, int reg, int numOfBytes);
 void i2c_write(uint32_t bus, int addr, int reg, int data);
 

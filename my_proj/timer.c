@@ -29,7 +29,7 @@ void TIM5_IRQHandler() {
 }
 
 
-void TIM5_init() {
+void tim5_init() {
   uint16_t prescale_value =  1;
   uint32_t auto_reload_value = 0;
   uint32_t arr_for_us_delay = 0;
@@ -67,7 +67,7 @@ void TIM5_init() {
  *  Returns: Nothing  
  */
 
-void TIM3_init() {
+void tim3_init() {
   uint16_t prescale_value =  8400;   /* for even division of 84MHz clock */
   uint16_t auto_reload_value = 0;
   uint16_t arr_for_ms_delay = 0;
@@ -103,7 +103,7 @@ void TIM3_init() {
  *  Returns: Nothing  
  */
 
-void TIM4_init() {
+void tim4_init() {
   uint16_t prescale_value = 840;
   uint16_t auto_reload_value = 1000;
 

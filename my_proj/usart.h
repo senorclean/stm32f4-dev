@@ -88,6 +88,6 @@ volatile uint8_t tail;
 volatile char inputData[BUF_SIZE];
 
 void USART2_IRQHandler();
-void USART2_init();
+void usart2_init();
 
 #endif

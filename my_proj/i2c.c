@@ -11,10 +11,9 @@
 volatile uint8_t i2cBuff[101] = {0};
 
 
-void I2C1_init()
+void i2c1_init()
 {
 
-	RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
 	RCC_APB1ENR |= RCC_APB1ENR_I2C1EN;
 
 
@@ -37,11 +36,6 @@ void I2C1_init()
 	I2C_CR1(I2C1) |= I2C_CR1_PE; 								/* I2C enable */
 
 	I2C_CR1(I2C1) |= I2C_CR1_ACK;
-
-	// take DAC chip out of reset
-	GPIO_MODER(GPIOD) |= GPIO_MODE(4, GPIO_MODE_OUTPUT);
-	GPIO_ODR(GPIOD) |= (1 << 4);
-
 }
 
 void clock_scl_timeout(uint32_t bus) {
@@ -83,13 +77,7 @@ void clock_scl_timeout(uint32_t bus) {
 
 
 void i2c_read(uint32_t bus, int addr, int reg, int numOfBytes) {
-	/* 1. set start bit
-	 * 2. INT: read SR1 for SB and write DR register with address
-	 * 3. INT: read SR1 for ADDR  and read SR2 for TRA (1 for transmitted
-	 *  	and 0 for receive?). If only reading one byte, disable ack as well
-	 * 4. INT: RXNE is 1, read DR
-	 * 5. INT: same as four, when done, set ACK=0 and stop
-	 */ 
+	
 	int i = 0;
 	int initialTimerCount = 0;
 	

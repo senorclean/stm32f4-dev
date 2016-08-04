@@ -10,18 +10,17 @@
  *  Returns: Nothing  
  */
 
-void led_init()
+void gpio_init()
 {
-  RCC_AHB1ENR |= RCC_AHB1ENR_GPIODEN;  
-  //GPIOD->MODER |= (1 << 30);            /* PD15 for the LED as an output */
+
+	RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+  RCC_AHB1ENR |= RCC_AHB1ENR_GPIODEN;
 
   // for PD12 (PWM for TIM4)
   GPIO_MODER(GPIOD) |= GPIO_MODE(12, GPIO_MODE_AF);
   GPIO_AFRH(GPIOD) |= GPIO_AFR(4, GPIO_AF2);
 
-
-  GPIO_MODER(GPIOD) |= GPIO_MODE(13, GPIO_MODE_OUTPUT);
-  GPIO_MODER(GPIOD) |= GPIO_MODE(14, GPIO_MODE_OUTPUT);
-  GPIO_MODER(GPIOD) |= GPIO_MODE(6, GPIO_MODE_OUTPUT);
-   
+	// take DAC chip out of reset
+	GPIO_MODER(GPIOD) |= GPIO_MODE(4, GPIO_MODE_OUTPUT);
+	GPIO_ODR(GPIOD) |= (1 << 4);   
 }

@@ -78,6 +78,6 @@
 
 /***** Variables and Function Prototypes ***********************************/
 
-void led_init();
+void gpio_init();
 
 #endif

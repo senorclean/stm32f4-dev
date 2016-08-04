@@ -348,8 +348,8 @@
 volatile uint16_t tim3Counter;
 volatile uint32_t tim5Counter;
 
-void TIM3_init();
-void TIM4_init();
-void TIM5_init();
+void tim3_init();
+void tim4_init();
+void tim5_init();
 
 #endif
