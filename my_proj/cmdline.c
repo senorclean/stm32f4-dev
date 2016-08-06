@@ -3,14 +3,14 @@
 #include "i2c.h"
 #include <string.h>
 
-#define BUF_SIZE ((uint8_t)255)
+#define CMD_BUF_SIZE ((uint8_t)255)
 #define MAX_HISTORY ((uint8_t)21)
 #define DEC ((uint8_t)10)
 #define HEX ((uint8_t)16)
 
 static int incrementFlag = 0;
 static int escapeFlag = 0;
-static char cmdString[MAX_HISTORY][BUF_SIZE] = {{'\0'}};
+static char cmdString[MAX_HISTORY][CMD_BUF_SIZE] = {{'\0'}};
 static uint8_t cmdStringPos = 0;
 static uint8_t cmdStringEndPos = 0;
 static uint8_t cmdHistPos = 0;
@@ -68,7 +68,7 @@ void display_cmd_string() {
   }
 
   incrementFlag = 0;
-  tail = (tail + 1) % BUF_SIZE;
+  tail = (tail + 1) % CMD_BUF_SIZE;
 }
 
 
@@ -273,7 +273,7 @@ void process_input() {
           j = cmdHistEndPos;
           while (j > 0) {
             i = 0;
-            clear_string(cmdString[j], BUF_SIZE, 0);
+            clear_string(cmdString[j], CMD_BUF_SIZE, 0);
             while (cmdString[j - 1][i] != '\0') {
               cmdString[j][i] = cmdString[j - 1][i];
               i++;
@@ -285,19 +285,19 @@ void process_input() {
           process_command();
 
           print_string("\r\n> ");
-          clear_string(cmdString[0], BUF_SIZE, 0);
+          clear_string(cmdString[0], CMD_BUF_SIZE, 0);
 
           cmdStringPos = 0;
           cmdStringEndPos = 0;
           cmdHistPos = 0;
 
 
-          tail = (tail + 1) % BUF_SIZE;
+          tail = (tail + 1) % CMD_BUF_SIZE;
           return;
 
         case 0x1B:                                    /* escape seq */
           escapeFlag++;
-          tail = (tail + 1) % BUF_SIZE;
+          tail = (tail + 1) % CMD_BUF_SIZE;
           return;
 
         case 0x7F:                                    /* backspace */
@@ -378,7 +378,7 @@ void process_input() {
               cmdStringPos = i;
               cmdStringEndPos = i;
 
-              clear_string(cmdString[0], (BUF_SIZE - cmdStringEndPos), 
+              clear_string(cmdString[0], (CMD_BUF_SIZE - cmdStringEndPos), 
                            cmdStringPos); 
             }
             break;
@@ -388,7 +388,7 @@ void process_input() {
               cmdHistPos--;
 
               if ((cmdHistPos == 0) && (cmdHistEndPos != 0)) {
-                clear_string(cmdString[0], (BUF_SIZE - cmdStringEndPos), 0);
+                clear_string(cmdString[0], (CMD_BUF_SIZE - cmdStringEndPos), 0);
 
                 cmdStringPos = 0;
                 cmdStringEndPos = 0;
@@ -405,7 +405,7 @@ void process_input() {
               cmdStringPos = i;
               cmdStringEndPos = i;
 
-              clear_string(cmdString[0], (BUF_SIZE - cmdStringEndPos), 
+              clear_string(cmdString[0], (CMD_BUF_SIZE - cmdStringEndPos), 
                            cmdStringPos);
             }
             break;
@@ -427,7 +427,7 @@ void process_input() {
       }
 
       else {
-        tail = (tail + 1) % BUF_SIZE;
+        tail = (tail + 1) % CMD_BUF_SIZE;
         escapeFlag++;
         return;
       }

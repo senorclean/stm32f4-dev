@@ -7,13 +7,6 @@
 #include "util.h"
 
 /* TO DO: */
-// setup enumerator in cmdline:
-	// general failure codes:
-		// 0 - failure
-		// 1 - success
-// wrote wrapper functions to make I2C little more streamlined
-	// try to figure out how to incorporate BTF while loop into func
-// get some error checking going on (I2C, USART)
 // enable DMA for USART for cmd line
 // use EEPROM for SPI functionality
 // recomment my code

@@ -11,9 +11,10 @@ volatile uint8_t head = 0;
 volatile uint8_t tail = 0;
 volatile char inputData[BUF_SIZE] = "";
 
+
 void USART2_IRQHandler()            /* function name defined in startup file */
 {
-  while (USART_SR(USART2) & (USART_SR_RXNE | USART_SR_ORE))
+  while (USART_SR(USART2) & USART_SR_RXNE)
   {
     inputData[head] = USART_DR(USART2);
 
@@ -26,12 +27,12 @@ void USART2_IRQHandler()            /* function name defined in startup file */
 
     head = (head + 1) % BUF_SIZE;
 
-    /* This doesn't work with how my loop is structured but there needs
-     * to be some kind of handling in case the buffer gets full before it
-     * can be read. I'll worry about it later.
-     */
-    /*if (head == tail)
-      tail = (tail + 1) % BUF_SIZE;*/
+    // wrap around when head starts back at origin
+    if (head < tail) {
+      tail = (tail + 1) % BUF_SIZE;
+      inputData[head] = inputData[BUF_SIZE - 1];
+      head = (head + 1) % BUF_SIZE;
+    }
   }
 }
 
