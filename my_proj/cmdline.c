@@ -98,7 +98,6 @@ void process_command() {
 
   if (!(strcmp(tokenCmd[0], "i2c"))) {
 
-
     if (!(strcmp(tokenCmd[1], "r"))) {
 
       i = 0;
@@ -156,15 +155,15 @@ void process_command() {
       i2cReg = string_to_number(i2cTokenCmd[2], HEX);
 
       
-      i2c_read(i2cMasterBus, i2cAddr, i2cReg, numOfBytes);
+      if(i2c_read(i2cMasterBus, i2cAddr, i2cReg, numOfBytes)) {
+        print_string("\r\nData: 0x");
 
-      print_string("\r\nData: 0x");
-
-      i = 0;
-      while (numOfBytes > 0) {
-        print_string("%x", i2cBuff[i]);
-        numOfBytes--;
-        i++;
+        i = 0;
+        while (numOfBytes > 0) {
+          print_string("%x", i2cBuff[i]);
+          numOfBytes--;
+          i++;
+        }
       }
       
       return;
@@ -212,7 +211,8 @@ void process_command() {
       i2cReg = string_to_number(i2cTokenCmd[2], HEX);
       i2cData = string_to_number(i2cTokenCmd[3], HEX);
 
-      i2c_write(i2cMasterBus, i2cAddr, i2cReg, i2cData);
+      if(i2c_write(i2cMasterBus, i2cAddr, i2cReg, i2cData));
+        print_string("\r\nWrite successful");
       
       return;
     }

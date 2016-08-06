@@ -19,8 +19,5 @@ void gpio_init()
   // for PD12 (PWM for TIM4)
   GPIO_MODER(GPIOD) |= GPIO_MODE(12, GPIO_MODE_AF);
   GPIO_AFRH(GPIOD) |= GPIO_AFR(4, GPIO_AF2);
-
-	// take DAC chip out of reset
-	GPIO_MODER(GPIOD) |= GPIO_MODE(4, GPIO_MODE_OUTPUT);
-	GPIO_ODR(GPIOD) |= (1 << 4);   
+  
 }

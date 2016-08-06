@@ -6,7 +6,7 @@
 #include "util.h"
 
 #define APB1_CLK_TIMER       ((uint32_t)84000000)
-#define MILLISECONDS_DELAY  ((uint16_t)1000)  
+#define MILLISECONDS_DELAY   ((uint16_t)1000)  
 
 
 volatile uint16_t tim3Counter = 0;

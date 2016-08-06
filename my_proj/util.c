@@ -2,6 +2,11 @@
 #include <stdarg.h>
 
 
+enum returnCodes {  
+                    FAILURE, 
+                    SUCCESS
+                 };
+
 /*  clear_string()
  *
  *  Takes string as input along with the value of its end position.

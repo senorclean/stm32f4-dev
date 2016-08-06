@@ -1,6 +1,11 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+enum returnCodes {  
+                    FAILURE, 
+                    SUCCESS
+                 };
+
 void decimal_to_ascii(int value, char *numArray);
 void hex_to_ascii(int value, char *numArray);
 void print_string(char *data, ...);
