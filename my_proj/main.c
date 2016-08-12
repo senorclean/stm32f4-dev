@@ -4,10 +4,8 @@
 #include "gpio.h"
 #include "sched.h"
 #include "i2c.h"
-#include "util.h"
 
 /* TO DO: */
-// enable DMA for USART for cmd line
 // use EEPROM for SPI functionality
 // recomment my code
 // put chip into low power modes and take it out
@@ -25,6 +23,7 @@ int main(void) {
   tim4_init();
   tim5_init();
   usart2_init();
+  dma_init();
   i2c1_init();
 
   while (1) {

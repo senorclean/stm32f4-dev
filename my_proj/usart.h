@@ -89,5 +89,6 @@ volatile char inputData[BUF_SIZE];
 
 void USART2_IRQHandler();
 void usart2_init();
+void dma_init();
 
 #endif

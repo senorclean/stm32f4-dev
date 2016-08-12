@@ -218,7 +218,7 @@ void process_command() {
     }
 
     if (tokenCmd[1][0] == '\0') {
-      print_string("\r\nI2C Buses:\r\n%s", i2c_buses);
+      print_string("\r\nI2C Devices:\r\n%s", i2c_buses);
       return;
     }
   }
@@ -239,7 +239,6 @@ void process_command() {
   else {
     print_string("\r\nError: Not a valid command");
     print_string("\r\nTry help or --help");
-    // not a valid command, try "help" or "--help"
   }
 }
 

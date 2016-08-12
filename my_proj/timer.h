@@ -45,13 +45,13 @@
 #define TIM_DMAR(tim_base) 			MMIO16(tim_base + 0x4C)
 
 /***** Timer CR1 Regs ************************************************/
-#define TIM_CR1_CKD 								(0 << 8)
+#define TIM_CR1_CKD 								~(3 << 8)
 #define TIM_CR1_CKD_MUL_2 					(1 << 8)
 #define TIM_CR1_CKD_MUL_4 					(2 << 8)
 
 #define TIM_CR1_APRE 								(1 << 7)
 
-#define TIM_CR1_CMS_EDGE 						(0 << 5)
+#define TIM_CR1_CMS_EDGE 						~(3 << 5)
 #define TIM_CR1_CMS_CENTER_1				(1 << 5)
 #define TIM_CR1_CMS_CENTER_2 				(2 << 5)
 #define TIM_CR1_CMS_CENTER_3 				(3 << 5)
@@ -64,16 +64,16 @@
 #define TIM_CR1_CEN 								(1 << 0)
 
 /***** Timer CR2 Regs ************************************************/
-#define TIM_CR2_TI1S 				(1 << 7)
+#define TIM_CR2_TI1S 								(1 << 7)
 
-#define TIM_CR2_MMS_RST 			(0 << 4)
-#define TIM_CR2_MMS_EN 				(1 << 4)
-#define TIM_CR2_MMS_UPDATE 			(2 << 4)
-#define TIM_CR2_CMP_PULSE			(3 << 4)
-#define TIM_CR2_CMP_OC1REF 			(4 << 4)
-#define TIM_CR2_CMP_OC2REF 			(5 << 4)
-#define TIM_CR2_CMP_OC3REF 			(6 << 4)
-#define TIM_CR2_CMP_OC4REF 			(7 << 4)
+#define TIM_CR2_MMS_RST 						~(7 << 4)
+#define TIM_CR2_MMS_EN 							(1 << 4)
+#define TIM_CR2_MMS_UPDATE 					(2 << 4)
+#define TIM_CR2_CMP_PULSE						(3 << 4)
+#define TIM_CR2_CMP_OC1REF 					(4 << 4)
+#define TIM_CR2_CMP_OC2REF 					(5 << 4)
+#define TIM_CR2_CMP_OC3REF 					(6 << 4)
+#define TIM_CR2_CMP_OC4REF 					(7 << 4)
 
 #define TIM_CR2_CCDS 				(1 << 3)
 
@@ -85,7 +85,7 @@
 #define TIM_SMCR_ETPS_DIV_4 		(2 << 12)
 #define TIM_SMCR_ETPS_DIV_8 		(3 << 12)
 
-#define TIM_SMCR_ETF_OFF 			(0 << 8)
+#define TIM_SMCR_ETF_OFF 						~(15 << 8)
 #define TIM_SMCR_ETF_CK_INT_N_2 	(1 << 8)
 #define TIM_SMCR_ETF_CK_INT_N_4 	(2 << 8)
 #define TIM_SMCR_ETF_CK_INT_N_8 	(3 << 8)

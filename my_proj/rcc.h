@@ -10,6 +10,8 @@
 #define RCC_APB1RSTR_I2C1RST 				(1 << 21)
 
 
+#define RCC_AHB1ENR_DMA2EN 					(1 << 22)
+#define RCC_AHB1ENR_DMA1EN 					(1 << 21)
 #define RCC_AHB1ENR_GPIODEN 				(1 << 3)
 #define RCC_AHB1ENR_GPIOBEN 				(1 << 1)
 #define RCC_AHB1ENR_GPIOAEN 				(1 << 0)
