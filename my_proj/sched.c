@@ -10,11 +10,26 @@ typedef struct {
   uint16_t  period;
 } func_t;
 
+/* 	array of functions to be called with the next time they should be
+ *	called (timestamp) and the amount of time after they're called before 
+ * 	they should be called again (period)
+ */
 static func_t funcArray[2] = 	{
                     						{heartbeat, 0, 10},
                     						{process_input, 0, 1}
                   						};
 
+
+
+/*  scheduler()
+ *
+ *  Arguments: None
+ *
+ *  Uses round-robin methodology to loop through an array of functions and
+ *  calls them based on their timestamp and period values explained above
+ *
+ *  Returns: Nothing  
+ */
 
 void scheduler() {
 	int i;

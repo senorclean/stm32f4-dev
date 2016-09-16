@@ -6,10 +6,11 @@
 #include "i2c.h"
 
 /* TO DO: */
-// use EEPROM for SPI functionality
 // recomment my code
-// put chip into low power modes and take it out
+// implement DMA on USART_TX as well
 // configure USB1 for ACM capability (it can talk USART as well)
+// use Wifi chip for SPI functionality
+// put chip into low power modes and take it out
 
 /***** Definitions ***********************************************************/
 #define HSE_VALUE ((uint32_t)8000000)
@@ -17,7 +18,6 @@
 
 /***** Main Loop *************************************************************/
 int main(void) {
-
   gpio_init();
   tim3_init();
   tim4_init();
