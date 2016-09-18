@@ -13,6 +13,7 @@ volatile uint8_t head = 0;
 volatile uint8_t tail = 0;
 volatile char inputData[BUF_SIZE] = "";
 static char dmaInput;
+char dmaOutputBuff[BUF_SIZE] = "";
 
 // load from the peripheral or memory location through DMA_SxPAR
 // or DMA_SxM0AR
@@ -68,6 +69,17 @@ void DMA1_Stream5_IRQHandler() {
 }
 
 
+/*  DMA1_Stream6_IRQHandler()
+ *
+ *  Clears the transfer complete flag once USART transfer is completed
+ */
+
+void DMA1_Stream6_IRQHandler() {
+  if (DMA_HISR(DMA1) & DMA_HISR_TCIF6)
+    DMA_HIFCR(DMA1) |= DMA_HIFCR_CTCIF6; 
+}
+
+
 /*  dma_init()
  *
  *  Arguments: None
@@ -82,7 +94,7 @@ void dma_init() {
   // enable DMA1 clock
   RCC_AHB1ENR |= RCC_AHB1ENR_DMA1EN;
 
-  // if DMA1 is currently enabled, disable it
+  // if DMA1 Stream 5 is currently enabled, disable it
   if (DMA_SCR(DMA1, 5) & DMA_SCR_EN)
     DMA_SCR(DMA1, 5) &= ~(DMA_SCR_EN);
 
@@ -107,7 +119,35 @@ void dma_init() {
   // enable DMA1 Stream 5 peripheral
   DMA_SCR(DMA1, 5) |= DMA_SCR_EN;
 
-  // ENABLE DMA1 STREAM 6 IN THE SAME WAY AS ABOVE
+
+  // if DMA1 Stream 6 is currently enabled, disable it
+  if (DMA_SCR(DMA1, 6) & DMA_SCR_EN)
+    DMA_SCR(DMA1, 6) &= ~(DMA_SCR_EN);
+
+  // memory to peripheral direction
+  DMA_SCR(DMA1, 6) |= DMA_SCR_DIR_MEM_TO_PER;
+  // set the peripheral address at USART2_DR register location
+  DMA_SPAR(DMA1, 6) = (USART2 + 0x04);
+  // set memory location at the address of the dmaOutput variable
+  DMA_SM0AR(DMA1, 6) = (int)&dmaOutputBuff[0];
+  // only have one transaction
+  DMA_SNDTR(DMA1, 6) = 1;
+  // select USART2 TX for DMA1 Stream 6
+  DMA_SCR(DMA1, 6) |= DMA_SCR_CHSEL(4);
+  // enable memory pointer incrementing
+  DMA_SCR(DMA1, 6) |= DMA_SCR_MINC;
+
+  // set interrupt priority as 2 (of 15 possible priorities)
+  NVIC_IPR((NVIC_DMA1_STREAM6_IRQ / 4) + (NVIC_DMA1_STREAM6_IRQ % 4)) = 0x20;
+  // enable DMA1 Stream 6 interrupt
+  NVIC_ISER(NVIC_DMA1_STREAM6_IRQ / 32) = (1 << (NVIC_DMA1_STREAM6_IRQ % 32));
+  
+  // clear interrupt flag
+  DMA_HIFCR(DMA1) |= DMA_HIFCR_CTCIF6;
+  // enable transfer complete interrupt, high priority level
+  DMA_SCR(DMA1, 6) |= (DMA_SCR_TCIE | DMA_SCR_PL_HIGH);
+  // enable DMA1 Stream 6 peripheral
+  DMA_SCR(DMA1, 6) |= DMA_SCR_EN;
 }
 
 
@@ -166,6 +206,8 @@ void usart2_init()
 
   // enable DMA mode with USART2 RX
   USART_CR3(USART2) |= USART_CR3_DMAR;
+  // enable DMA mode with USART2 TX
+  USART_CR3(USART2) |= USART_CR3_DMAT;
   // enable USART2 peripheral
   USART_CR1(USART2) |= USART_CR1_UE;    
 }

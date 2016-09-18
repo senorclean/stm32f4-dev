@@ -78,25 +78,25 @@
 #define DMA_LIFCR_CTCIF3 						(1 << 27)
 #define DMA_LIFCR_CHTIF3 						(1 << 26)
 #define DMA_LIFCR_CTEIF3 						(1 << 25)
-#define DMA_LIFCR_CDMEIF3 						(1 << 24)
+#define DMA_LIFCR_CDMEIF3 					(1 << 24)
 #define DMA_LIFCR_CFEIF3 						(1 << 22)
 
 #define DMA_LIFCR_CTCIF2 						(1 << 21)
 #define DMA_LIFCR_CHTIF2 						(1 << 20)
 #define DMA_LIFCR_CTEIF2 						(1 << 19)
-#define DMA_LIFCR_CDMEIF2 						(1 << 18)
+#define DMA_LIFCR_CDMEIF2 					(1 << 18)
 #define DMA_LIFCR_CFEIF2 						(1 << 16)
 
 #define DMA_LIFCR_CTCIF1 						(1 << 11)
 #define DMA_LIFCR_CHTIF1 						(1 << 10)
 #define DMA_LIFCR_CTEIF1 						(1 << 9)
-#define DMA_LIFCR_CDMEIF1 						(1 << 8)
+#define DMA_LIFCR_CDMEIF1 					(1 << 8)
 #define DMA_LIFCR_CFEIF1 						(1 << 6)
 
 #define DMA_LIFCR_CTCIF0 						(1 << 5)
 #define DMA_LIFCR_CHTIF0 						(1 << 4)
 #define DMA_LIFCR_CTEIF0 						(1 << 3)
-#define DMA_LIFCR_CDMEIF0 						(1 << 2)
+#define DMA_LIFCR_CDMEIF0 					(1 << 2)
 #define DMA_LIFCR_CFEIF0 						(1 << 0)
 
 /***** DMA HIFCR Regs ***************************************************/
@@ -156,9 +156,9 @@
 #define DMA_SCR_PINC 								(1 << 9)
 #define DMA_SCR_CIRC 								(1 << 8)
 
-#define DMA_SCR_DIR_PER_TO_MEM 			~(3 << 7)
-#define DMA_SCR_DIR_MEM_TO_PER 			(1 << 7)
-#define DMA_SCR_DIR_MEM_TO_MEM 			(2 << 7)
+#define DMA_SCR_DIR_PER_TO_MEM 			~(3 << 6)
+#define DMA_SCR_DIR_MEM_TO_PER 			(1 << 6)
+#define DMA_SCR_DIR_MEM_TO_MEM 			(2 << 6)
 
 #define DMA_SCR_PFCTRL 							(1 << 5)
 #define DMA_SCR_TCIE 								(1 << 4)

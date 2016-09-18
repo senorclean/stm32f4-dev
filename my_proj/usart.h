@@ -86,6 +86,7 @@
 volatile uint8_t head;
 volatile uint8_t tail;
 volatile char inputData[BUF_SIZE];
+char dmaOutputBuff[BUF_SIZE];
 
 void USART2_IRQHandler();
 void usart2_init();

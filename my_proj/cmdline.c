@@ -21,6 +21,14 @@ static uint8_t cmdHistPos = 0;
 static uint8_t cmdHistEndPos = 0;
 static uint8_t i2cBusTotal = 1;
 
+static const char clear_line[] =
+"\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D"
+"\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D"
+"\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D"
+"\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D" 
+"                                                                     "
+"";
+
 static const char i2c_buses[] =
 "0.94 CS43L22 DAC\n\r"
 "";
@@ -41,12 +49,8 @@ static const char help_cmd[] =
 
 void display_cmd_string() {
   int i;
-  // clear cmd line
-  for(i = 0; i < 60; i++)
-    print_string("\e[D");
-
-  for(i = 0; i < 60; i++)
-    print_char(' ');
+  // clear console screen command line
+  print_string("%s", clear_line);
 
   // print cmd string
   print_string("\r> %s", cmdString[0]);  
@@ -289,8 +293,7 @@ void process_command() {
 
 void process_input() {
   // if there is data to be read from the input buffer
-  if (tail < head)
-  {
+  if (tail < head) {
     int i;
     int j;
 

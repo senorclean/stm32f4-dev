@@ -1,4 +1,6 @@
 #include "usart.h"
+#include "dma.h"
+#include "nvic.h"
 #include <stdarg.h>
 
 
@@ -328,6 +330,7 @@ uint32_t string_to_number(char *str, int base) {
 void print_string(char *data, ...) {
   int i = 0;
   int j = 0;
+  int k = 0;
   char *tempStr;
   int tempInt = 0;
   char tempArray[11] = "";
@@ -335,6 +338,13 @@ void print_string(char *data, ...) {
 
   // starts using any arguments input after "data"
   va_start(args, data);
+
+  // wait for the last USART transaction to be completed
+  while(!(USART_SR(USART2) & USART_SR_TC));
+
+  // if DMA1 Stream 6 is currently enabled, disable it
+  if (DMA_SCR(DMA1, 6) & DMA_SCR_EN)
+    DMA_SCR(DMA1, 6) &= ~(DMA_SCR_EN);
 
   while (data[i] != '\0') {
     // if there is a special argument used
@@ -349,8 +359,9 @@ void print_string(char *data, ...) {
 
           j = 0;
           while(tempArray[j] != '\0') {
-            print_char(tempArray[j]);
-            j++; 
+            dmaOutputBuff[k] = tempArray[j];
+            j++;
+            k++; 
           }
 
           break;
@@ -362,8 +373,9 @@ void print_string(char *data, ...) {
 
           j = 0;
           while (*(tempStr + j) != '\0') {
-            print_char(*(tempStr + j));
-            j++; 
+            dmaOutputBuff[k] = *(tempStr + j);
+            j++;
+            k++; 
           }
           break;
 
@@ -377,8 +389,9 @@ void print_string(char *data, ...) {
 
           j = 0;
           while(tempArray[j] != '\0') {
-            print_char(tempArray[j]);
-            j++; 
+            dmaOutputBuff[k] = tempArray[j];
+            j++;
+            k++; 
           }
 
           break;
@@ -391,10 +404,32 @@ void print_string(char *data, ...) {
     }
     // if it's not a special argument, just print the value
     else {
-      print_char(data[i]);
-      i++; 
+      dmaOutputBuff[k] = data[i];
+      i++;
+      k++; 
     } 
   }
+
+  // DMA in normal mode needs to be reconfigured every time it's used
+
+  // memory to peripheral direction
+  DMA_SCR(DMA1, 6) |= DMA_SCR_DIR_MEM_TO_PER;
+  // set the peripheral address at USART2_DR register location
+  DMA_SPAR(DMA1, 6) = (USART2 + 0x04);
+  // set memory location at the address of the dmaOutput variable
+  DMA_SM0AR(DMA1, 6) = (int)&dmaOutputBuff[0];
+  // transfers 
+  DMA_SNDTR(DMA1, 6) = k;
+  // select USART2 TX for DMA1 Stream 6
+  DMA_SCR(DMA1, 6) |= DMA_SCR_CHSEL(4);
+  // enable memory pointer incrementing
+  DMA_SCR(DMA1, 6) |= DMA_SCR_MINC;
+  // clear interrupt flag
+  DMA_HIFCR(DMA1) |= DMA_HIFCR_CTCIF6;
+  // enable transfer complete interrupt, high priority level
+  DMA_SCR(DMA1, 6) |= (DMA_SCR_TCIE | DMA_SCR_PL_HIGH);
+  // enable DMA1 Stream 6 peripheral
+  DMA_SCR(DMA1, 6) |= DMA_SCR_EN;
 
   va_end(args);  
 }
