@@ -19,6 +19,8 @@
 #define OTG_FS_CID          		 				MMIO32(USB_OTG_FS_BASE + 0x03C)
 #define OTG_FS_DIEPTXF           				MMIO32(USB_OTG_FS_BASE + 0x104)
 
+#define OTG_FS_PCGCCTL 									MMIO32(USB_OTG_FS_BASE + 0xE00)
+
 /***** USB_OTG_FS Device Regs **********************************************/
 #define OTG_FS_DCFG           					MMIO32(USB_OTG_FS_BASE + 0x800)
 #define OTG_FS_DCTL           					MMIO32(USB_OTG_FS_BASE + 0x804)

@@ -2,15 +2,23 @@
 # Put your stlink folder here so make burn will work.
 STLINK=/home/andrew/stlink
 
+# Put your STM32F4 library code directory here
+STM_COMMON=../STM32F4-Discovery_FW_V1.1.0
+STM_COMMON_LIB=../STM32F4-Discovery_FW_V1.1.0/Libraries
+
 # Put your source files here (or *.c, etc)
 SRCS  = main.c system_stm32f4xx.c misc.c usart.c cmdline.c util.c timer.c
-SRCS += heartbeat.c gpio.c sched.c i2c.c usb.c
+SRCS += heartbeat.c gpio.c sched.c i2c.c stm32fxxx.it.c usb_bsp.c usbd_desc.c
+SRCS += usbd_usr.c usb_core.c usbd_cdc_vcp.c
+SRCS += $(STM_COMMON_LIB)/STM32_USB_OTG_Driver/src/usb_dcd_int.c
+SRCS += $(STM_COMMON_LIB)/STM32_USB_OTG_Driver/src/usb_dcd.c
+SRCS += $(STM_COMMON_LIB)/STM32_USB_Device_Library/Core/src/usbd_core.c
+SRCS += $(STM_COMMON_LIB)/STM32_USB_Device_Library/Core/src/usbd_req.c
+SRCS += $(STM_COMMON_LIB)/STM32_USB_Device_Library/Core/src/usbd_ioreq.c
+SRCS += $(STM_COMMON_LIB)/STM32_USB_Device_Library/Class/cdc/src/usbd_cdc_core.c
 
 # Binaries will be generated with this name (.elf, .bin, .hex, etc)
 PROJ_NAME=main
-
-# Put your STM32F4 library code directory here
-STM_COMMON=../STM32F4-Discovery_FW_V1.1.0
 
 # The compiler
 CC=arm-none-eabi-gcc
@@ -66,6 +74,10 @@ $(PROJ_NAME).elf: $(SRCS)
 	$(CC) $(CFLAGS) $^ -o $@ 
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
+
+# replace main.c with any particular file I want to see the asm of (EX: usb.c)
+asm:
+	$(CC) $(CFLAGS) -S -fverbose-asm -Wa, main.c
 
 # if 'make clean' is entered, all of these files are removed before
 # it attempts to compile the program.
