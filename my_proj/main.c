@@ -7,6 +7,7 @@
 
 /* TO DO: */ 
 // configure USB1 for ACM capability (it can talk USART as well)
+
 // use Wifi chip for SPI functionality
 // put chip into low power modes and take it out
 
