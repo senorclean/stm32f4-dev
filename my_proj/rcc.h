@@ -3,14 +3,10 @@
 
 #include "memorymap.h"
 
-#define RCC_PLLCFGR 								MMIO32(RCC_BASE + 0x04)
 #define RCC_APB1RSTR 								MMIO32(RCC_BASE + 0x20)
 #define RCC_AHB1ENR									MMIO32(RCC_BASE + 0x30)
-#define RCC_AHB2ENR 								MMIO32(RCC_BASE + 0x34)
 #define RCC_APB1ENR 								MMIO32(RCC_BASE + 0x40)
-#define RCC_APB2ENR 								MMIO32(RCC_BASE + 0x44)
 
-#define RCC_APB1RSTR_PWRRST					(1 << 28)
 #define RCC_APB1RSTR_I2C1RST 				(1 << 21)
 
 
@@ -20,16 +16,11 @@
 #define RCC_AHB1ENR_GPIOBEN 				(1 << 1)
 #define RCC_AHB1ENR_GPIOAEN 				(1 << 0)
 
-#define RCC_AHB2ENR_OTGFSEN 				(1 << 7)
-
-#define RCC_APB1ENR_PWREN 					(1 << 28)
 #define RCC_APB1ENR_I2C1EN 					(1 << 21)
 #define RCC_APB1ENR_USART2EN 				(1 << 17)
 #define RCC_APB1ENR_TIM5EN 					(1 << 3)
 #define RCC_APB1ENR_TIM4EN 					(1 << 2)
 #define RCC_APB1ENR_TIM3EN 					(1 << 1)
-
-#define RCC_APB2ENR_SYSCFGEN 				(1 << 14)
 
 
 #endif
