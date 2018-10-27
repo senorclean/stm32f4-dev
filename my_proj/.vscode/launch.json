@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ARM GDB",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/_build/stm32f4.elf",
+            "args": [""],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            // "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "debugServerArgs": "-f /usr/share/openocd/scripts/board/stm32f4discovery.cfg",
+            "debugServerPath": "openocd",
+            "serverLaunchTimeout": 20000,
+            "filterStderr": true,
+            "filterStdout": true,
+            // this should be the last thing openocd prints after it boots up
+            "serverStarted": "Info : clock speed 1800 kHz",
+            "miDebuggerPath": "/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-gdb",
+            "miDebuggerArgs": "${workspaceFolder}/_build/stm32f4.elf",
+            "setupCommands": [
+                { "text": "set target-async off"},
+                { "text": "target remote localhost:3333"},
+                { "text": "mon reset halt"},
+                { "text": "load"},
+            ],
+            "logging": {
+                "moduleLoad": true,
+                "trace": true,
+                "engineLogging": true,
+                "programOutput": true,
+                "exceptions": true,
+                "traceResponse": true
+            }
+        }
+    ]
+}
