@@ -14,6 +14,7 @@
 #define HSE_VALUE ((uint32_t)8000000)
 
 
+
 /***** Main Loop *************************************************************/
 int main(void) {
   gpio_init();
